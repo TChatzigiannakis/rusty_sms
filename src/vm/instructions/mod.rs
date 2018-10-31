@@ -2,6 +2,7 @@ mod arithmetic_16bit;
 mod arithmetic_8bit;
 mod bitwise;
 mod call_return;
+mod control;
 mod exchange;
 mod jump;
 mod load_16bit;
@@ -19,6 +20,10 @@ impl Machine {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
             Opcode::Nop => self.nop(),
+            Opcode::SCF => self.set_carry_flag(),
+            Opcode::CCF => self.complement_carry_flag(),
+            Opcode::CPL => self.complement_registers(|regs| &mut regs.a),
+            Opcode::Halt => self.halt(),
 
             Opcode::Exx => self.shadow_exchange_bc_de_hl(),
             Opcode::ExAFAF => self.shadow_exchange_af(),
@@ -271,12 +276,7 @@ impl Machine {
             Opcode::PopDE => self.pop_from_stack(|regs| (&mut regs.d, &mut regs.e)),
             Opcode::PopHL => self.pop_from_stack(|regs| (&mut regs.h, &mut regs.l)),
 
-            Opcode::SCF => self.set_carry_flag(),
-            Opcode::CCF => self.complement_carry_flag(),
-            Opcode::CPL => self.complement_registers(|regs| &mut regs.a),
             Opcode::RLCA => self.rotate_accumulator_left(),
-
-            Opcode::Halt => self.halt(),
         }
     }
 
