@@ -6,6 +6,7 @@ mod exchange;
 mod load_16bit;
 mod load_8bit;
 pub mod opcodes;
+mod rotate_shift;
 mod stack;
 
 use vm::cpu::flags::Flag;
