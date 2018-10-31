@@ -5,7 +5,7 @@ use vm::cpu::registers::Registers;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn increment_register_wide(
+    pub(crate) fn increment_register_pair(
         &mut self,
         target: fn(&mut Registers) -> (&mut u8, &mut u8),
     ) {
@@ -13,7 +13,7 @@ impl Machine {
         self.clock(6);
     }
 
-    pub(crate) fn decrement_register_wide(
+    pub(crate) fn decrement_register_pair(
         &mut self,
         target: fn(&mut Registers) -> (&mut u8, &mut u8),
     ) {
