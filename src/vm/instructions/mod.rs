@@ -3,7 +3,8 @@ mod arithmetic_8bit;
 mod bitwise;
 mod control;
 mod exchange;
-mod memory;
+mod load_16bit;
+mod load_8bit;
 pub mod opcodes;
 mod stack;
 
