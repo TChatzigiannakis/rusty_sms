@@ -2,6 +2,6 @@
 
 Username|Contributions
 :------:|:----------------
-TChatzigiannakis|Architecture, 16-bit arithmetic
-Vassalware|Memory operations, control flow
-raidenfreeman|8-bit arithmetic, bitwise operations
+TChatzigiannakis|Architecture, instruction set (8-bit and 16-bit arithmetic, exchange, CPU control)
+Vassalware|Instruction set (load, call, return, jump)
+raidenfreeman|Instruction set (8-bit arithmetic, bitwise)
