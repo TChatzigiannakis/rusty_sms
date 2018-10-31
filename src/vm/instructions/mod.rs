@@ -1,8 +1,9 @@
 mod arithmetic_16bit;
 mod arithmetic_8bit;
 mod bitwise;
-mod control;
+mod call_return;
 mod exchange;
+mod jump;
 mod load_16bit;
 mod load_8bit;
 pub mod opcodes;
