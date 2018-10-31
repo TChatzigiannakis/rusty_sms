@@ -123,6 +123,28 @@ impl Machine {
             Opcode::LdVBCA => self.load_into_memory(|regs| regs.a, |regs| (regs.b, regs.c)),
             Opcode::LdVDEA => self.load_into_memory(|regs| regs.a, |regs| (regs.d, regs.e)),
 
+            Opcode::LdAVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.a)
+            }
+            Opcode::LdBVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.b)
+            }
+            Opcode::LdCVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.c)
+            }
+            Opcode::LdDVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.d)
+            }
+            Opcode::LdEVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.e)
+            }
+            Opcode::LdHVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.h)
+            }
+            Opcode::LdLVHL => {
+                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.l)
+            }
+
             Opcode::LdBA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.b),
             Opcode::LdBB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.b),
             Opcode::LdBC => self.load_register_into_register(|regs| regs.c, |regs| &mut regs.b),
@@ -130,9 +152,6 @@ impl Machine {
             Opcode::LdBE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.b),
             Opcode::LdBH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.b),
             Opcode::LdBL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.b),
-            Opcode::LdBHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.b)
-            }
 
             Opcode::LdCA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.c),
             Opcode::LdCB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.c),
@@ -141,9 +160,6 @@ impl Machine {
             Opcode::LdCE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.c),
             Opcode::LdCH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.c),
             Opcode::LdCL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.c),
-            Opcode::LdCHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.c)
-            }
 
             Opcode::LdDA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.d),
             Opcode::LdDB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.d),
@@ -152,9 +168,6 @@ impl Machine {
             Opcode::LdDE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.d),
             Opcode::LdDH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.d),
             Opcode::LdDL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.d),
-            Opcode::LdDHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.d)
-            }
 
             Opcode::LdEA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.e),
             Opcode::LdEB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.e),
@@ -163,9 +176,6 @@ impl Machine {
             Opcode::LdEE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.e),
             Opcode::LdEH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.e),
             Opcode::LdEL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.e),
-            Opcode::LdEHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.e)
-            }
 
             Opcode::LdHA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.h),
             Opcode::LdHB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.h),
@@ -174,9 +184,6 @@ impl Machine {
             Opcode::LdHE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.h),
             Opcode::LdHH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.h),
             Opcode::LdHL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.h),
-            Opcode::LdHHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.h)
-            }
 
             Opcode::LdLA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.l),
             Opcode::LdLB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.l),
@@ -185,9 +192,6 @@ impl Machine {
             Opcode::LdLE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.l),
             Opcode::LdLH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.l),
             Opcode::LdLL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.l),
-            Opcode::LdLHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.l)
-            }
 
             Opcode::LdHLA => self.load_register_into_memory(|regs| regs.a, |regs| (regs.h, regs.l)),
             Opcode::LdHLB => self.load_register_into_memory(|regs| regs.b, |regs| (regs.h, regs.l)),
@@ -204,9 +208,6 @@ impl Machine {
             Opcode::LdAE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.a),
             Opcode::LdAH => self.load_register_into_register(|regs| regs.h, |regs| &mut regs.a),
             Opcode::LdAL => self.load_register_into_register(|regs| regs.l, |regs| &mut regs.a),
-            Opcode::LdAHL => {
-                self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.a)
-            }
 
             Opcode::LdAX => self.load_into_register(|regs| &mut regs.a),
             Opcode::LdBX => self.load_into_register(|regs| &mut regs.b),
