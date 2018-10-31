@@ -1,3 +1,5 @@
+## Credits
+
 Username|Contributions
 :------:|:----------------
 TChatzigiannakis|Architecture, 16-bit arithmetic
