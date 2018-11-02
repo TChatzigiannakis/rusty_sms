@@ -277,6 +277,7 @@ impl Machine {
             Opcode::PopHL => self.pop_from_stack(|regs| (&mut regs.h, &mut regs.l)),
 
             Opcode::RLCA => self.rotate_accumulator_left(),
+            Opcode::RRCA => self.rotate_accumulator_right(),
         }
     }
 
