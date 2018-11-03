@@ -1,17 +1,17 @@
 use vm::cpu::flags::Flag;
-use vm::cpu::registers::Registers;
+use vm::cpu::state::State;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn and_register(&mut self, selector: fn(&Registers) -> u8) {
+    pub(crate) fn and_register(&mut self, selector: fn(&State) -> u8) {
         self.bitwise_with_register(selector, |a, b| a & b, true);
     }
 
-    pub(crate) fn or_register(&mut self, selector: fn(&Registers) -> u8) {
+    pub(crate) fn or_register(&mut self, selector: fn(&State) -> u8) {
         self.bitwise_with_register(selector, |a, b| a | b, false);
     }
 
-    pub(crate) fn xor_register(&mut self, selector: fn(&Registers) -> u8) {
+    pub(crate) fn xor_register(&mut self, selector: fn(&State) -> u8) {
         self.bitwise_with_register(selector, |a, b| a ^ b, false);
     }
 
@@ -29,11 +29,11 @@ impl Machine {
 
     fn bitwise_with_register(
         &mut self,
-        selector: fn(&Registers) -> u8,
+        selector: fn(&State) -> u8,
         operation: fn(u8, u8) -> u8,
         half_carry_value: bool,
     ) {
-        let operand = selector(&self.cpu.state.registers);
+        let operand = selector(&self.cpu.state);
         self.bitwise_operation(operand, operation, half_carry_value);
         self.clock(4);
     }
@@ -50,7 +50,7 @@ impl Machine {
         operation: fn(u8, u8) -> u8,
         half_carry_value: bool,
     ) {
-        let op1 = self.cpu.state.registers.a;
+        let op1 = self.cpu.state.registers.af.0;
         let op2 = operand;
         let result = operation(op1, op2);
         let parity = (0..8).fold(0, |acc, b| acc + (result >> b) & 1) % 2 == 0;

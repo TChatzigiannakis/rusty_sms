@@ -1,4 +1,4 @@
-use vm::cpu::registers::Registers;
+use vm::cpu::alu;
 
 pub struct Memory {
     data: [u8; 65536],
@@ -24,7 +24,7 @@ impl Memory {
     }
 
     pub fn write_u16(&mut self, address: u16, value: u16) {
-        let (low, high) = Registers::u16_to_u8s(value);
+        let (low, high) = alu::get_octets(value);
         self.write_u8(address, low);
         self.write_u8(address + 1, high);
     }

@@ -1,5 +1,5 @@
 use vm::cpu::flags::Flag;
-use vm::cpu::registers::Registers;
+use vm::cpu::state::State;
 use vm::machine::Machine;
 
 impl Machine {
@@ -33,8 +33,8 @@ impl Machine {
         self.clock(4);
     }
 
-    pub(crate) fn complement_registers(&mut self, selector: fn(&mut Registers) -> &mut u8) {
-        *selector(&mut self.cpu.state.registers) = *selector(&mut self.cpu.state.registers);
+    pub(crate) fn complement_registers(&mut self, selector: fn(&mut State) -> &mut u8) {
+        *selector(&mut self.cpu.state) = *selector(&mut self.cpu.state);
         Flag::AddSubtract.set(&mut self.cpu.state.status, true);
         Flag::HalfCarry.set(&mut self.cpu.state.status, true);
         self.clock(4);

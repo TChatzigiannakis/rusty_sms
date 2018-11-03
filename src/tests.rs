@@ -57,7 +57,7 @@ mod tests {
         let mut vm = new_vm(|_| {}, range().map(|_| Opcode::IncA).collect(), 0);
         for iteration in range() {
             let i = iteration as u8;
-            let a = vm.cpu.get_register(|regs| regs.a);
+            let a = vm.get_register(|cpu| cpu.registers.af.0);
             let h = Flag::HalfCarry.get(&vm.cpu.state.status);
             let s = Flag::Sign.get(&vm.cpu.state.status);
             let ov = Flag::ParityOverflow.get(&vm.cpu.state.status);
@@ -77,7 +77,7 @@ mod tests {
         let mut vm = new_vm(|_| {}, range().map(|_| Opcode::IncBC).collect(), 0);
         for iteration in range() {
             let i = iteration as u16;
-            let bc = vm.cpu.get_register_pair(|regs| (regs.b, regs.c));
+            let bc = vm.get_register_pair(|cpu| cpu.registers.bc);
             assert_eq!(i, bc);
             vm.execute();
         }
@@ -87,32 +87,32 @@ mod tests {
     fn add() {
         let mut vm = run_program(
             |regs| {
-                regs.a = 0x7E;
-                regs.b = 0x01;
+                regs.af.0 = 0x7E;
+                regs.bc.0 = 0x01;
             },
             vec![Opcode::AddB, Opcode::Halt],
         );
 
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x7F);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x7F);
         assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(!Flag::Sign.get(&vm.cpu.state.status));
         assert!(!Flag::Carry.get(&vm.cpu.state.status));
 
         vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x80);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x80);
         assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(Flag::Sign.get(&vm.cpu.state.status));
         assert!(!Flag::Carry.get(&vm.cpu.state.status));
 
         vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x81);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x81);
         assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(Flag::Sign.get(&vm.cpu.state.status));
         assert!(!Flag::Carry.get(&vm.cpu.state.status));
 
-        vm.cpu.state.registers.a = 0xFF;
+        vm.cpu.state.registers.af.0 = 0xFF;
         vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x00);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x00);
         assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(!Flag::Sign.get(&vm.cpu.state.status));
         assert!(Flag::Carry.get(&vm.cpu.state.status));
@@ -121,35 +121,25 @@ mod tests {
     #[test]
     fn increment_wide() {
         let mut vm = run_program(
-            |regs| {
-                regs.b = 0x00;
-                regs.c = 0xFE;
-            },
+            |regs| regs.bc = (0x00, 0xFE),
             vec![Opcode::IncBC, Opcode::Halt],
         );
-        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x00);
-        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0xFF);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x00, 0xFF));
 
         vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x01);
-        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0x00);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x01, 0x00));
     }
 
     #[test]
     fn decrement_wide() {
         let mut vm = run_program(
-            |regs| {
-                regs.b = 0x01;
-                regs.c = 0x00;
-            },
+            |regs| regs.bc = (0x01, 0x00),
             vec![Opcode::DecBC, Opcode::Halt],
         );
-        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x00);
-        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0xFF);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x00, 0xFF));
 
         vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x00);
-        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0xFE);
+        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x00, 0xFE));
     }
 
     fn jump_test_flag(opcode: Opcode, param: u16, flag: Flag, flag_value: bool, expected: u16) {
@@ -161,7 +151,8 @@ mod tests {
         vm.load(&p);
         flag.set(&mut vm.cpu.state.status, flag_value);
         vm.start();
-        assert_eq!(vm.cpu.state.program_counter, expected);
+        let pc = alu::get_word_from_tuple(vm.cpu.state.pc);
+        assert_eq!(pc, expected);
     }
 
     #[test]
@@ -192,25 +183,24 @@ mod tests {
         p.add(Opcode::LdBC);
         vm.load(&p);
 
-        vm.cpu.state.registers.b = 0;
-        vm.cpu.state.registers.c = 20;
+        vm.cpu.state.registers.bc = (0x00, 0x20);
 
         vm.start();
 
-        assert_eq!(vm.cpu.state.registers.b, 20);
+        assert_eq!(vm.cpu.state.registers.bc, (0x20, 0x20));
     }
 
     #[test]
     fn load_param() {
         let mut vm = Machine::new();
         let mut p = Program::new();
-        p.add_param(Opcode::LdBX, 42);
+        p.add_param(Opcode::LdBX, 0x42);
         vm.load(&p);
 
-        vm.cpu.state.registers.b = 0;
+        vm.cpu.state.registers.bc = (0x00, 0x00);
 
         vm.start();
 
-        assert_eq!(vm.cpu.state.registers.b, 42);
+        assert_eq!(vm.cpu.state.registers.bc, (0x42, 0x00));
     }
 }

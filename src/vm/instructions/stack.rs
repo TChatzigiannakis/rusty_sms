@@ -1,50 +1,39 @@
-use vm::cpu::registers::Registers;
+use vm::cpu::alu;
+use vm::cpu::state::State;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn push_to_stack(&mut self, selector: fn(&Registers) -> (u8, u8)) {
-        let (op1, op2) = selector(&self.cpu.state.registers);
-        let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
-        self.ram.write_u8(sp - 1, op1);
-        self.ram.write_u8(sp - 2, op2);
-        let (s, p) = Registers::u16_to_u8s(sp - 2);
-        self.cpu.state.registers.s = s;
-        self.cpu.state.registers.p = p;
+    pub(crate) fn push_to_stack(&mut self, selector: fn(&State) -> (u8, u8)) {
+        let value = alu::get_word_from_tuple(selector(&self.cpu.state));
+        let sp = alu::get_word_from_tuple(self.cpu.state.sp);
+        self.ram.write_u16(sp, value);
+        self.cpu.state.sp = alu::get_octets(sp - 2);
         self.clock(11);
     }
 
     pub(crate) fn push_program_counter_to_stack(&mut self) {
-        let (op1, op2) = Registers::u16_to_u8s(self.cpu.state.program_counter);
-        let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
-        self.ram.write_u8(sp - 1, op1);
-        self.ram.write_u8(sp - 2, op2);
-        let (s, p) = Registers::u16_to_u8s(sp - 2);
-        self.cpu.state.registers.s = s;
-        self.cpu.state.registers.p = p;
+        let pc = alu::get_word_from_tuple(self.cpu.state.pc);
+        let sp = alu::get_word_from_tuple(self.cpu.state.sp);
+        self.ram.write_u16(sp, pc);
+        self.cpu.state.sp = alu::get_octets(sp - 2);
     }
 
-    pub(crate) fn pop_from_stack(&mut self, selector: fn(&mut Registers) -> (&mut u8, &mut u8)) {
-        let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
-        let high_val = self.ram.read_u8(sp);
-        let low_val = self.ram.read_u8(sp + 1);
+    pub(crate) fn pop_from_stack(&mut self, selector: fn(&mut State) -> &mut (u8, u8)) {
+        let sp = alu::get_word_from_tuple(self.cpu.state.sp);
         {
-            let (high_reg, low_reg) = selector(&mut self.cpu.state.registers);
-            *high_reg = high_val;
-            *low_reg = low_val;
+            let (high_reg, low_reg) = selector(&mut self.cpu.state);
+            let value = alu::get_octets(self.ram.read_u16(sp));
+            *high_reg = value.0;
+            *low_reg = value.1;
         }
-        let (s, p) = Registers::u16_to_u8s(sp + 2);
-        self.cpu.state.registers.s = s;
-        self.cpu.state.registers.p = p;
+        self.cpu.state.sp = alu::get_octets(sp + 2);
         self.clock(10);
     }
 
     pub(crate) fn pop_stack_to_program_counter(&mut self) {
-        let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
-        let high_val = self.ram.read_u8(sp);
-        let low_val = self.ram.read_u8(sp + 1);
-        self.cpu.state.program_counter = Registers::u8s_to_u16(high_val, low_val);
-        let (s, p) = Registers::u16_to_u8s(sp + 2);
-        self.cpu.state.registers.s = s;
-        self.cpu.state.registers.p = p;
+        let sp = alu::get_word_from_tuple(self.cpu.state.sp);
+        let value = self.ram.read_u16(sp);
+        self.cpu.state.pc = alu::get_octets(value);
+        self.cpu.state.sp = alu::get_octets(sp + 2);
     }
 }

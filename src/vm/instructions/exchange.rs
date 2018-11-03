@@ -1,53 +1,48 @@
 use std::mem;
+use vm::cpu::alu;
 use vm::cpu::registers::Registers;
+use vm::cpu::state::State;
 use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn shadow_exchange_af(&mut self) {
-        self.exchange_with_shadow(&[|regs| &mut regs.a, |regs| &mut regs.f]);
+        self.exchange_with_shadow(&[|regs| &mut regs.af]);
         self.clock(4);
     }
 
     pub(crate) fn shadow_exchange_bc_de_hl(&mut self) {
         self.exchange_with_shadow(&[
-            |regs| &mut regs.b,
-            |regs| &mut regs.c,
-            |regs| &mut regs.d,
-            |regs| &mut regs.e,
-            |regs| &mut regs.h,
-            |regs| &mut regs.l,
+            |regs| &mut regs.bc,
+            |regs| &mut regs.de,
+            |regs| &mut regs.hl,
         ]);
         self.clock(4);
     }
 
     pub(crate) fn exhange_de_with_hl(&mut self) {
-        self.exchange(&[
-            |regs| (&mut regs.d, &mut regs.h),
-            |regs| (&mut regs.e, &mut regs.l),
-        ]);
+        self.exchange(&[|cpu| (&mut cpu.registers.de, &mut cpu.registers.hl)]);
         self.clock(4);
     }
 
     pub(crate) fn exchage_memory_from_sp_with_hl(&mut self) {
         {
-            let reg = &mut self.cpu.state.registers;
-            let low_address = (reg.s as u16) << 8 | reg.p as u16;
-            let high_address = low_address + 1;
-            self.ram.write_u8(low_address, reg.l);
-            self.ram.write_u8(high_address, reg.h);
+            let sp = alu::get_word_from_tuple(self.cpu.state.sp);
+            let reg_value = alu::get_word_from_tuple(self.cpu.state.registers.hl);
+            let mem_value = self.ram.read_u16(sp);
+            self.cpu.state.registers.hl = alu::get_octets(mem_value);
+            self.ram.write_u16(sp, reg_value);
         }
         self.clock(19);
     }
 
-    fn exchange(&mut self, selectors: &[fn(&mut Registers) -> (&mut u8, &mut u8)]) {
-        let reg = &mut self.cpu.state.registers;
+    fn exchange(&mut self, selectors: &[fn(&mut State) -> (&mut (u8, u8), &mut (u8, u8))]) {
         for s in selectors {
-            let (r1, r2) = s(reg);
+            let (r1, r2) = s(&mut self.cpu.state);
             mem::swap(r1, r2);
         }
     }
 
-    fn exchange_with_shadow(&mut self, selectors: &[fn(&mut Registers) -> &mut u8]) {
+    fn exchange_with_shadow(&mut self, selectors: &[fn(&mut Registers) -> &mut (u8, u8)]) {
         let reg = &mut self.cpu.state.registers;
         let alt = &mut self.cpu.state.alt_registers;
         for s in selectors {
