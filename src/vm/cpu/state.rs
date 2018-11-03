@@ -33,6 +33,6 @@ impl State {
     }
 
     pub(crate) fn get_word(&mut self, target: fn(&mut State) -> &mut (u8, u8)) -> u16 {
-        alu::get_word_from_tuple(*target(self))
+        alu::get_word(*target(self))
     }
 }

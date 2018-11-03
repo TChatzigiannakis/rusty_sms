@@ -56,14 +56,14 @@ impl Machine {
     }
 
     pub fn get_register_pair(&self, selector: fn(&State) -> (u8, u8)) -> u16 {
-        alu::get_word_from_tuple(self.get_register(selector))
+        alu::get_word(self.get_register(selector))
     }
 
     pub fn get_register_pair_mut(&mut self, selector: fn(&mut State) -> &mut (u8, u8)) -> u16 {
-        alu::get_word(
+        alu::get_word((
             selector(&mut self.cpu.state).0,
             selector(&mut self.cpu.state).1,
-        )
+        ))
     }
 
     pub fn set_register<T>(&mut self, selector: fn(&mut State) -> &mut T, value: T) {

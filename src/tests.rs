@@ -151,7 +151,7 @@ mod tests {
         vm.load(&p);
         flag.set(&mut vm.cpu.state.status, flag_value);
         vm.start();
-        let pc = alu::get_word_from_tuple(vm.cpu.state.pc);
+        let pc = alu::get_word(vm.cpu.state.pc);
         assert_eq!(pc, expected);
     }
 

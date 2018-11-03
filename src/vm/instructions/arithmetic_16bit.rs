@@ -42,7 +42,7 @@ impl Machine {
         affected_flags: &[Flag],
     ) {
         let op1 = self.cpu.state.get_word(target);
-        let op2 = operation.maybe_negate(alu::get_word_from_tuple(operand));
+        let op2 = operation.maybe_negate(alu::get_word(operand));
         let result = alu::add_words(op1, op2);
         self.cpu.state.assign_word(target, result.value);
         Flag::set_values(

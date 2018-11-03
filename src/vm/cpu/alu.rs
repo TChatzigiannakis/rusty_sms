@@ -18,12 +18,9 @@ pub(crate) fn get_octets(value: u16) -> (u8, u8) {
     (high, low)
 }
 
-pub(crate) fn get_word(high: u8, low: u8) -> u16 {
+pub(crate) fn get_word(value: (u8, u8)) -> u16 {
+    let (high, low) = value;
     ((high as u16) << 8) | low as u16
-}
-
-pub(crate) fn get_word_from_tuple(value: (u8, u8)) -> u16 {
-    get_word(value.0, value.1)
 }
 
 pub(crate) fn get_bit<T: Zero + One>(value: bool) -> T {
@@ -75,7 +72,7 @@ pub(crate) fn add_words(a: u16, b: u16) -> AdderResult<u16> {
         result.carry |= result.carry;
         result
     };
-    let result = get_word(high.value, low.value);
+    let result = get_word((high.value, low.value));
     let overflow = if a < 0x8000 && b < 0x8000 {
         result > 0x7FFF
     } else if a > 0x7FFF && b > 0x7FFF {

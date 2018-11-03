@@ -22,7 +22,7 @@ impl Machine {
         selector: fn(&mut State) -> &mut u8,
     ) {
         {
-            let address = alu::get_word_from_tuple(pointer(&self.cpu.state));
+            let address = alu::get_word(pointer(&self.cpu.state));
             let value = self.ram.read_u8(address);
             let dest = selector(&mut self.cpu.state);
             *dest = value;
@@ -36,7 +36,7 @@ impl Machine {
         pointer: fn(&State) -> (u8, u8),
     ) {
         {
-            let address = alu::get_word_from_tuple(pointer(&self.cpu.state));
+            let address = alu::get_word(pointer(&self.cpu.state));
             let value = selector(&self.cpu.state);
             self.ram.write_u8(address, value);
         }
@@ -73,7 +73,7 @@ impl Machine {
     ) {
         {
             let value = source(&self.cpu.state);
-            let address = alu::get_word_from_tuple(pointer(&self.cpu.state));
+            let address = alu::get_word(pointer(&self.cpu.state));
             self.ram.write_u8(address, value);
         }
         self.clock(7);

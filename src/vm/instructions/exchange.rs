@@ -26,8 +26,8 @@ impl Machine {
 
     pub(crate) fn exchage_memory_from_sp_with_hl(&mut self) {
         {
-            let sp = alu::get_word_from_tuple(self.cpu.state.sp);
-            let reg_value = alu::get_word_from_tuple(self.cpu.state.registers.hl);
+            let sp = alu::get_word(self.cpu.state.sp);
+            let reg_value = alu::get_word(self.cpu.state.registers.hl);
             let mem_value = self.ram.read_u16(sp);
             self.cpu.state.registers.hl = alu::get_octets(mem_value);
             self.ram.write_u16(sp, reg_value);

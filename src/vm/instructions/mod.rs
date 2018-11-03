@@ -438,7 +438,7 @@ impl Machine {
     }
 
     fn next_byte(&mut self) -> u8 {
-        let pc = alu::get_word_from_tuple(self.cpu.state.pc);
+        let pc = alu::get_word(self.cpu.state.pc);
         let val = self.ram.read_u8(pc);
         let (result, overflow) = pc.overflowing_add(1);
         if overflow {

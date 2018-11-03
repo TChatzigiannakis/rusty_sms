@@ -8,7 +8,7 @@ impl Machine {
         selector: fn(&State) -> (u8, u8),
     ) {
         let address = self.next_word();
-        let value = alu::get_word_from_tuple(selector(&self.cpu.state));
+        let value = alu::get_word(selector(&self.cpu.state));
         self.ram.write_u16(address, value);
         self.clock(16);
     }
@@ -29,7 +29,7 @@ impl Machine {
     }
 
     pub(crate) fn load_param_into_memory(&mut self, selector: fn(&State) -> (u8, u8)) {
-        let address = alu::get_word_from_tuple(selector(&self.cpu.state));
+        let address = alu::get_word(selector(&self.cpu.state));
         let value = self.next_byte();
         self.ram.write_u8(address, value);
         self.clock(10);
