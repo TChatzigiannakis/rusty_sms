@@ -58,9 +58,9 @@ mod tests {
         for iteration in range() {
             let i = iteration as u8;
             let a = vm.get_register(|cpu| cpu.registers.af.0);
-            let h = Flag::HalfCarry.get(&vm.cpu.state.status);
-            let s = Flag::Sign.get(&vm.cpu.state.status);
-            let ov = Flag::ParityOverflow.get(&vm.cpu.state.status);
+            let h = Flag::HalfCarry.get(&vm.cpu.state);
+            let s = Flag::Sign.get(&vm.cpu.state);
+            let ov = Flag::ParityOverflow.get(&vm.cpu.state);
             assert_eq!(i, a);
             assert_eq!(i >= 0x80, s, "At value {}.", i);
             assert_eq!(i == 0x80, ov, "At value {}.", i);
@@ -94,28 +94,28 @@ mod tests {
         );
 
         assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x7F);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(!Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state));
+        assert!(!Flag::Sign.get(&vm.cpu.state));
+        assert!(!Flag::Carry.get(&vm.cpu.state));
 
         vm.start_at(0);
         assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x80);
-        assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+        assert!(Flag::ParityOverflow.get(&vm.cpu.state));
+        assert!(Flag::Sign.get(&vm.cpu.state));
+        assert!(!Flag::Carry.get(&vm.cpu.state));
 
         vm.start_at(0);
         assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x81);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state));
+        assert!(Flag::Sign.get(&vm.cpu.state));
+        assert!(!Flag::Carry.get(&vm.cpu.state));
 
         vm.cpu.state.registers.af.0 = 0xFF;
         vm.start_at(0);
         assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x00);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(!Flag::Sign.get(&vm.cpu.state.status));
-        assert!(Flag::Carry.get(&vm.cpu.state.status));
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state));
+        assert!(!Flag::Sign.get(&vm.cpu.state));
+        assert!(Flag::Carry.get(&vm.cpu.state));
     }
 
     #[test]
@@ -149,7 +149,7 @@ mod tests {
         p.add(Opcode::Halt);
         p.add(Opcode::Halt);
         vm.load(&p);
-        flag.set(&mut vm.cpu.state.status, flag_value);
+        flag.set(&mut vm.cpu.state, flag_value);
         vm.start();
         let pc = alu::get_word(vm.cpu.state.pc);
         assert_eq!(pc, expected);

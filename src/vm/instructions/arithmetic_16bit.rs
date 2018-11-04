@@ -46,7 +46,7 @@ impl Machine {
         let result = alu::add_words(op1, op2);
         self.cpu.state.assign_word(target, result.value);
         Flag::set_values(
-            &mut self.cpu.state.status,
+            &mut self.cpu.state,
             affected_flags,
             &[
                 (Flag::Zero, result.value == 0x0000),

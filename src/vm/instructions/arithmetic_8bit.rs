@@ -25,7 +25,7 @@ impl Machine {
 
     pub(crate) fn add_carry_register(&mut self, selector: fn(&State) -> u8) {
         let operand = self.get_register(selector);
-        let carry = Flag::Carry.get_bit(&self.cpu.state.status);
+        let carry = Flag::Carry.get_bit(&self.cpu.state);
         self.operate_on_register(
             Operation::Add,
             |cpu| &mut cpu.registers.af.0,
@@ -62,7 +62,7 @@ impl Machine {
 
     pub(crate) fn subtract_carry_register(&mut self, selector: fn(&State) -> u8) {
         let operand = self.get_register(selector);
-        let carry = Flag::Carry.get_bit(&self.cpu.state.registers.af.1);
+        let carry = Flag::Carry.get_bit(&self.cpu.state);
         self.operate_on_register(
             Operation::Subtract,
             |cpu| &mut cpu.registers.af.0,
@@ -123,7 +123,7 @@ impl Machine {
         let result = alu::add_octets(op1, op2);
         *target(&mut self.cpu.state) = result.value;
         Flag::set_values(
-            &mut self.cpu.state.status,
+            &mut self.cpu.state,
             affected_flags,
             &[
                 (Flag::Zero, result.value == 0x00),

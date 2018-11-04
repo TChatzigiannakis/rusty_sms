@@ -9,10 +9,10 @@ impl Machine {
         let new_value = (old_value << 1) | carry;
         self.cpu.state.registers.af.0 = new_value as u8;
         {
-            let status = &mut self.cpu.state.status;
-            Flag::Carry.set(status, carry == 1);
-            Flag::HalfCarry.set(status, false);
-            Flag::AddSubtract.set(status, false);
+            let state = &mut self.cpu.state;
+            Flag::Carry.set(state, carry == 1);
+            Flag::HalfCarry.set(state, false);
+            Flag::AddSubtract.set(state, false);
         }
         self.clock(4);
     }
@@ -23,10 +23,10 @@ impl Machine {
         let new_value = (carry << 7) | (old_value >> 1);
         self.cpu.state.registers.af.0 = new_value as u8;
         {
-            let status = &mut self.cpu.state.status;
-            Flag::Carry.set(status, carry != 0);
-            Flag::HalfCarry.set(status, false);
-            Flag::AddSubtract.set(status, false);
+            let state = &mut self.cpu.state;
+            Flag::Carry.set(state, carry != 0);
+            Flag::HalfCarry.set(state, false);
+            Flag::AddSubtract.set(state, false);
         }
         self.clock(4);
     }

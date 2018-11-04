@@ -6,7 +6,6 @@ pub struct State {
     pub alt_registers: Registers,
     pub pc: (u8, u8),
     pub sp: (u8, u8),
-    pub status: u8,
 }
 
 impl State {
@@ -16,7 +15,6 @@ impl State {
             alt_registers: Registers::new(),
             pc: (0x00, 0x00),
             sp: (0x00, 0x00),
-            status: 0,
         }
     }
 

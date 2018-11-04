@@ -55,12 +55,12 @@ impl Machine {
         let result = operation(op1, op2);
         let parity = (0..8).fold(0, |acc, b| acc + (result >> b) & 1) % 2 == 0;
 
-        let status = &mut self.cpu.state.status;
-        Flag::ParityOverflow.set(status, parity);
-        Flag::Carry.set(status, false);
-        Flag::HalfCarry.set(status, half_carry_value);
-        Flag::AddSubtract.set(status, false);
-        Flag::Zero.set(status, result == 0x00);
-        Flag::Sign.set(status, result > 0x7F);
+        let state = &mut self.cpu.state;
+        Flag::ParityOverflow.set(state, parity);
+        Flag::Carry.set(state, false);
+        Flag::HalfCarry.set(state, half_carry_value);
+        Flag::AddSubtract.set(state, false);
+        Flag::Zero.set(state, result == 0x00);
+        Flag::Sign.set(state, result > 0x7F);
     }
 }

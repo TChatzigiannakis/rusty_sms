@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use vm::cpu::state::State;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[repr(u8)]
@@ -14,42 +15,31 @@ pub enum Flag {
 }
 
 impl Flag {
-    pub fn set(self, register: &mut u8, value: bool) {
+    pub fn set(self, state: &mut State, value: bool) {
         let mask = self as u8;
+        let reg = &mut state.registers.af.1;
         if value {
-            *register |= mask;
+            *reg |= mask;
         } else {
-            *register &= !mask;
+            *reg &= !mask;
         };
     }
 
-    pub fn get(self, register: &u8) -> bool {
-        self.get_bit(register) > 0
+    pub fn get(self, state: &State) -> bool {
+        self.get_bit(state) > 0
     }
 
-    pub fn get_bit(self, register: &u8) -> u8 {
+    pub fn get_bit(self, state: &State) -> u8 {
         let mask = self as u8;
-        *register & mask
+        let reg = &state.registers.af.1;
+        *reg & mask
     }
 
-    pub fn all() -> [Flag; 8] {
-        [
-            Flag::Carry,
-            Flag::AddSubtract,
-            Flag::ParityOverflow,
-            Flag::HalfCarry,
-            Flag::Zero,
-            Flag::Sign,
-            Flag::Unused1,
-            Flag::Unused2,
-        ]
-    }
-
-    pub(crate) fn set_values(status: &mut u8, affected: &[Flag], values: &[(Flag, bool)]) {
+    pub(crate) fn set_values(state: &mut State, affected: &[Flag], values: &[(Flag, bool)]) {
         let map: HashMap<Flag, bool> = values.iter().cloned().collect();
         for flag in affected {
             match map.get(&flag) {
-                Some(value) => flag.set(status, *value),
+                Some(value) => flag.set(state, *value),
                 None => {}
             }
         }
