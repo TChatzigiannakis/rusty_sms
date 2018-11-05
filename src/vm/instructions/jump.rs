@@ -14,7 +14,7 @@ impl Machine {
     pub(crate) fn jump_relative(&mut self, condition: fn(&State) -> bool) {
         if condition(&self.cpu.state) {
             let offset = self.next_byte();
-            let pc = alu::get_word(self.cpu.state.pc);
+            let pc = alu::get_word(self.cpu.state.pc) - 1;
             let (destination, _) = pc.overflowing_add(offset as u16);
             self.cpu.goto(destination);
             self.clock(12);
@@ -22,4 +22,6 @@ impl Machine {
             self.clock(7);
         }
     }
+
+    pub(crate) fn decrement_and_jump_on_non_zero(&mut self) {}
 }
