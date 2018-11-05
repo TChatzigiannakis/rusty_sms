@@ -104,6 +104,12 @@ impl Machine {
             Opcode::JpPXX => self.jump(|status| !Flag::Sign.get(status)),
             Opcode::JpMXX => self.jump(|status| Flag::Sign.get(status)),
 
+            Opcode::JrX => self.jump_relative(|_| true),
+            Opcode::JrCX => self.jump_relative(|status| Flag::Carry.get(status)),
+            Opcode::JrNCX => self.jump_relative(|status| !Flag::Carry.get(status)),
+            Opcode::JrZX => self.jump_relative(|status| Flag::Zero.get(status)),
+            Opcode::JrNZX => self.jump_relative(|status| !Flag::Zero.get(status)),
+
             Opcode::CallXX => self.call(|_| true),
             Opcode::CallNZXX => self.call(|status| !Flag::Zero.get(status)),
             Opcode::CallZXX => self.call(|status| Flag::Zero.get(status)),
