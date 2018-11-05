@@ -432,8 +432,10 @@ impl Machine {
             Opcode::PopDE => self.pop_from_stack(|cpu| &mut cpu.registers.de),
             Opcode::PopHL => self.pop_from_stack(|cpu| &mut cpu.registers.hl),
 
-            Opcode::RLCA => self.rotate_accumulator_left(),
-            Opcode::RRCA => self.rotate_accumulator_right(),
+            Opcode::RLCA => self.rotate_accumulator_copy_left(),
+            Opcode::RRCA => self.rotate_accumulator_copy_right(),
+            Opcode::RLA => self.rotate_accumulator_left(),
+            Opcode::RRA => self.rotate_accumulator_right(),
         }
     }
 
