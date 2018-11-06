@@ -42,7 +42,6 @@ pub enum Opcode {
     IncH = 0x24,
     DecH = 0x25,
     LdHX = 0x26,
-    DAA = 0x27,
     JrZX = 0x28,
     AddHLHL = 0x29,
     LdHLVXX = 0x2A,
