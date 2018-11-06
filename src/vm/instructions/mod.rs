@@ -51,11 +51,13 @@ impl Machine {
             Opcode::IncDE => self.increment_register_pair(|cpu| &mut cpu.registers.de),
             Opcode::IncHL => self.increment_register_pair(|cpu| &mut cpu.registers.hl),
             Opcode::IncSP => self.increment_register_pair(|cpu| &mut cpu.sp),
+            Opcode::IncVHL => self.increment_memory(),
 
             Opcode::DecBC => self.decrement_register_pair(|cpu| &mut cpu.registers.bc),
             Opcode::DecDE => self.decrement_register_pair(|cpu| &mut cpu.registers.de),
             Opcode::DecHL => self.decrement_register_pair(|cpu| &mut cpu.registers.hl),
             Opcode::DecSP => self.decrement_register_pair(|cpu| &mut cpu.sp),
+            Opcode::DecVHL => self.decrement_memory(),
 
             Opcode::AddA => self.add_register(|cpu| cpu.registers.af.0),
             Opcode::AddB => self.add_register(|cpu| cpu.registers.bc.0),

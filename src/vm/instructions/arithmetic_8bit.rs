@@ -111,6 +111,34 @@ impl Machine {
         self.clock(4);
     }
 
+    pub(crate) fn increment_memory(&mut self) {
+        self.operate_on_memory(
+            Operation::Add,
+            1,
+            &[
+                Flag::Sign,
+                Flag::Zero,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::AddSubtract,
+            ],
+        )
+    }
+
+    pub(crate) fn decrement_memory(&mut self) {
+        self.operate_on_memory(
+            Operation::Subtract,
+            1,
+            &[
+                Flag::Sign,
+                Flag::Zero,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::AddSubtract,
+            ],
+        )
+    }
+
     fn operate_on_register(
         &mut self,
         operation: Operation,
@@ -122,6 +150,26 @@ impl Machine {
         let op2 = operation.maybe_negate(operand);
         let result = alu::add_octets(op1, op2);
         *target(&mut self.cpu.state) = result.value;
+        Flag::set_values(
+            &mut self.cpu.state,
+            affected_flags,
+            &[
+                (Flag::Zero, result.value == 0x00),
+                (Flag::Sign, result.value > 0x7F),
+                (Flag::HalfCarry, result.half_carry),
+                (Flag::ParityOverflow, result.overflow),
+                (Flag::AddSubtract, operation == Operation::Subtract),
+                (Flag::Carry, result.carry),
+            ],
+        );
+    }
+
+    fn operate_on_memory(&mut self, operation: Operation, operand: u8, affected_flags: &[Flag]) {
+        let address = self.get_register_pair(|state| state.registers.hl);
+        let op1 = self.ram.read_u8(address);
+        let op2 = operation.maybe_negate(operand);
+        let result = alu::add_octets(op1, op2);
+        self.ram.write_u8(address, result.value);
         Flag::set_values(
             &mut self.cpu.state,
             affected_flags,
