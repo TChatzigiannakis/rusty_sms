@@ -110,7 +110,7 @@ impl Machine {
             Opcode::JrZX => self.jump_relative(|status| Flag::Zero.get(status)),
             Opcode::JrNZX => self.jump_relative(|status| !Flag::Zero.get(status)),
 
-            Opcode::DjΝΖX => self.decrement_and_jump_on_non_zero(),
+            Opcode::DjNZX => self.decrement_and_jump_on_non_zero(),
 
             Opcode::CallXX => self.call(|_| true),
             Opcode::CallNZXX => self.call(|status| !Flag::Zero.get(status)),
