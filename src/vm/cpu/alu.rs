@@ -35,6 +35,14 @@ pub(crate) fn negate<T: Add<Output = T> + Not<Output = T> + One>(value: T) -> T 
     !value + num::one()
 }
 
+pub(crate) fn sign_extend(value: u8) -> u16 {
+    if value > 0x7F {
+        negate(value) as u16 | 1 << 15
+    } else {
+        value as u16
+    }
+}
+
 pub(crate) fn add_octets(a: u8, b: u8) -> AdderResult<u8> {
     let (low_nibble, half_carry) = Nibble::from_u8(a).overflowing_add(Nibble::from_u8(b));
     let (high_nibble_temp, carry_temp_1) =
