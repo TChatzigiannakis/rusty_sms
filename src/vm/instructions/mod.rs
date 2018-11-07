@@ -66,6 +66,7 @@ impl Machine {
             Opcode::AddE => self.add_register(|cpu| cpu.registers.de.1),
             Opcode::AddH => self.add_register(|cpu| cpu.registers.hl.0),
             Opcode::AddL => self.add_register(|cpu| cpu.registers.hl.1),
+            Opcode::AddVHL => self.add_memory(),
 
             Opcode::SubA => self.subtract_register(|cpu| cpu.registers.af.0),
             Opcode::SubB => self.subtract_register(|cpu| cpu.registers.bc.0),
@@ -74,6 +75,7 @@ impl Machine {
             Opcode::SubE => self.subtract_register(|cpu| cpu.registers.de.1),
             Opcode::SubH => self.subtract_register(|cpu| cpu.registers.hl.0),
             Opcode::SubL => self.subtract_register(|cpu| cpu.registers.hl.1),
+            Opcode::SubVHL => self.sub_memory(),
 
             Opcode::AddHLBC => self.add_register_pair_to_hl(|cpu| cpu.registers.bc),
             Opcode::AddHLDE => self.add_register_pair_to_hl(|cpu| cpu.registers.de),

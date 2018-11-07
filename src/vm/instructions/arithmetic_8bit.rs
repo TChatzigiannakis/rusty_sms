@@ -6,46 +6,25 @@ use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn add_register(&mut self, selector: fn(&State) -> u8) {
-        let operand = self.get_register(selector);
-        self.operate_on_register(
-            Operation::Add,
-            |cpu| &mut cpu.registers.af.0,
-            operand,
-            &[
-                Flag::AddSubtract,
-                Flag::Carry,
-                Flag::HalfCarry,
-                Flag::ParityOverflow,
-                Flag::Sign,
-                Flag::Zero,
-            ],
-        );
-        self.clock(4);
+        self.op_register(Operation::Add, selector);
     }
 
     pub(crate) fn add_carry_register(&mut self, selector: fn(&State) -> u8) {
-        let operand = self.get_register(selector);
-        let carry = Flag::Carry.get_bit(&self.cpu.state);
-        self.operate_on_register(
-            Operation::Add,
-            |cpu| &mut cpu.registers.af.0,
-            operand + carry,
-            &[
-                Flag::AddSubtract,
-                Flag::Carry,
-                Flag::HalfCarry,
-                Flag::ParityOverflow,
-                Flag::Sign,
-                Flag::Zero,
-            ],
-        );
-        self.clock(4);
+        self.op_carry_register(Operation::Add, selector);
     }
 
     pub(crate) fn subtract_register(&mut self, selector: fn(&State) -> u8) {
+        self.op_register(Operation::Subtract, selector);
+    }
+
+    pub(crate) fn subtract_carry_register(&mut self, selector: fn(&State) -> u8) {
+        self.op_carry_register(Operation::Subtract, selector);
+    }
+
+    fn op_register(&mut self, operation: Operation, selector: fn(&State) -> u8) {
         let operand = self.get_register(selector);
         self.operate_on_register(
-            Operation::Subtract,
+            operation,
             |cpu| &mut cpu.registers.af.0,
             operand,
             &[
@@ -60,11 +39,11 @@ impl Machine {
         self.clock(4);
     }
 
-    pub(crate) fn subtract_carry_register(&mut self, selector: fn(&State) -> u8) {
+    fn op_carry_register(&mut self, operation: Operation, selector: fn(&State) -> u8) {
         let operand = self.get_register(selector);
         let carry = Flag::Carry.get_bit(&self.cpu.state);
         self.operate_on_register(
-            Operation::Subtract,
+            operation,
             |cpu| &mut cpu.registers.af.0,
             operand + carry,
             &[
@@ -80,24 +59,16 @@ impl Machine {
     }
 
     pub(crate) fn increment_register(&mut self, target: fn(&mut State) -> &mut u8) {
-        self.operate_on_register(
-            Operation::Add,
-            target,
-            1,
-            &[
-                Flag::AddSubtract,
-                Flag::ParityOverflow,
-                Flag::HalfCarry,
-                Flag::Zero,
-                Flag::Sign,
-            ],
-        );
-        self.clock(4);
+        self.op_register_by_1(target, Operation::Add);
     }
 
     pub(crate) fn decrement_register(&mut self, target: fn(&mut State) -> &mut u8) {
+        self.op_register_by_1(target, Operation::Subtract);
+    }
+
+    fn op_register_by_1(&mut self, target: fn(&mut State) -> &mut u8, operation: Operation) {
         self.operate_on_register(
-            Operation::Subtract,
+            operation,
             target,
             1,
             &[
@@ -112,22 +83,16 @@ impl Machine {
     }
 
     pub(crate) fn increment_memory(&mut self) {
-        self.operate_on_memory(
-            Operation::Add,
-            1,
-            &[
-                Flag::Sign,
-                Flag::Zero,
-                Flag::HalfCarry,
-                Flag::ParityOverflow,
-                Flag::AddSubtract,
-            ],
-        )
+        self.op_memory_by_1(Operation::Add);
     }
 
     pub(crate) fn decrement_memory(&mut self) {
+        self.op_memory_by_1(Operation::Subtract)
+    }
+
+    fn op_memory_by_1(&mut self, operation: Operation) {
         self.operate_on_memory(
-            Operation::Subtract,
+            operation,
             1,
             &[
                 Flag::Sign,
@@ -136,7 +101,34 @@ impl Machine {
                 Flag::ParityOverflow,
                 Flag::AddSubtract,
             ],
-        )
+        );
+    }
+
+    pub(crate) fn add_memory(&mut self) {
+        self.op_accumulator_memory(Operation::Add);
+    }
+
+    pub(crate) fn sub_memory(&mut self) {
+        self.op_accumulator_memory(Operation::Subtract);
+    }
+
+    fn op_accumulator_memory(&mut self, operation: Operation) {
+        let address = self.get_register_pair(|state| state.registers.hl);
+        let operand = self.ram.read_u8(address);
+        self.operate_on_register(
+            operation,
+            |state| &mut state.registers.af.0,
+            operand,
+            &[
+                Flag::Sign,
+                Flag::Zero,
+                Flag::Carry,
+                Flag::ParityOverflow,
+                Flag::AddSubtract,
+                Flag::Carry,
+            ],
+        );
+        self.clock(7);
     }
 
     fn operate_on_register(
