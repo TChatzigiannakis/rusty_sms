@@ -1,6 +1,7 @@
 use vm::cpu::alu;
 use vm::cpu::state::State;
 use vm::machine::Machine;
+use vm::AddressSelector;
 
 impl Machine {
     pub(crate) fn load_register_into_register(
@@ -18,11 +19,11 @@ impl Machine {
 
     pub(crate) fn load_memory_into_register(
         &mut self,
-        pointer: fn(&State) -> (u8, u8),
+        pointer: AddressSelector,
         selector: fn(&mut State) -> &mut u8,
     ) {
         {
-            let address = alu::get_word(pointer(&self.cpu.state));
+            let address = pointer(&self.cpu.state);
             let value = self.ram.read_u8(address);
             let dest = selector(&mut self.cpu.state);
             *dest = value;
@@ -66,14 +67,10 @@ impl Machine {
         self.clock(7);
     }
 
-    pub(crate) fn load_into_memory(
-        &mut self,
-        source: fn(&State) -> u8,
-        pointer: fn(&State) -> (u8, u8),
-    ) {
+    pub(crate) fn load_into_memory(&mut self, source: fn(&State) -> u8, pointer: AddressSelector) {
         {
             let value = source(&self.cpu.state);
-            let address = alu::get_word(pointer(&self.cpu.state));
+            let address = pointer(&self.cpu.state);
             self.ram.write_u8(address, value);
         }
         self.clock(7);

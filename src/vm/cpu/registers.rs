@@ -1,13 +1,8 @@
-use vm::cpu::state::State;
-
-type Register = u8;
-type DoubleRegister = (u8, u8);
-
-type RegisterSelector = fn(&State) -> Register;
-type DoubleRegisterSelector = fn(&State) -> DoubleRegister;
-
-type TargetRegisterSelector = fn(&mut State) -> &mut Register;
-type TargetDoubleRegisterSelector = fn(&mut State) -> &mut DoubleRegister;
+use vm::cpu::alu;
+use vm::{
+    AddressSelector, DoubleRegisterSelector, Register, RegisterSelector,
+    TargetDoubleRegisterSelector, TargetRegisterSelector,
+};
 
 pub struct Registers {
     pub af: (Register, Register),
@@ -78,55 +73,67 @@ impl Registers {
         |cpu| cpu.registers.hl.1
     }
 
-    pub fn to_af() -> TargetDoubleRegisterSelector {
+    pub fn address_in_bc() -> AddressSelector {
+        |cpu| alu::get_word(cpu.registers.bc)
+    }
+
+    pub fn address_in_de() -> AddressSelector {
+        |cpu| alu::get_word(cpu.registers.de)
+    }
+
+    pub fn address_in_hl() -> AddressSelector {
+        |cpu| alu::get_word(cpu.registers.hl)
+    }
+
+    pub fn into_af() -> TargetDoubleRegisterSelector {
         |cpu| &mut cpu.registers.af
     }
 
-    pub fn to_bc() -> TargetDoubleRegisterSelector {
+    pub fn into_bc() -> TargetDoubleRegisterSelector {
         |cpu| &mut cpu.registers.bc
     }
 
-    pub fn to_de() -> TargetDoubleRegisterSelector {
+    pub fn into_de() -> TargetDoubleRegisterSelector {
         |cpu| &mut cpu.registers.de
     }
 
-    pub fn to_hl() -> TargetDoubleRegisterSelector {
+    pub fn into_hl() -> TargetDoubleRegisterSelector {
         |cpu| &mut cpu.registers.hl
     }
 
-    pub fn to_sp() -> TargetDoubleRegisterSelector {
+    pub fn into_sp() -> TargetDoubleRegisterSelector {
         |cpu| &mut cpu.sp
     }
 
-    pub fn to_a() -> TargetRegisterSelector {
+    pub fn into_a() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.af.0
     }
 
-    pub fn to_f() -> TargetRegisterSelector {
+    pub fn into_f() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.af.1
     }
 
-    pub fn to_b() -> TargetRegisterSelector {
+    pub fn into_b() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.bc.0
     }
 
-    pub fn to_c() -> TargetRegisterSelector {
+    pub fn into_c() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.bc.1
     }
 
-    pub fn to_d() -> TargetRegisterSelector {
+    pub fn into_d() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.de.0
     }
 
-    pub fn to_e() -> TargetRegisterSelector {
+    pub fn into_e() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.de.1
     }
 
-    pub fn to_h() -> TargetRegisterSelector {
+    pub fn into_h() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.hl.0
     }
 
-    pub fn to_l() -> TargetRegisterSelector {
+    pub fn into_l() -> TargetRegisterSelector {
         |cpu| &mut cpu.registers.hl.1
     }
 }
