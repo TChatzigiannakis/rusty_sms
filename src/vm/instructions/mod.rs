@@ -13,6 +13,7 @@ mod stack;
 
 use vm::cpu::alu;
 use vm::cpu::flags::Flag;
+use vm::cpu::registers::Registers;
 use vm::instructions::opcodes::Opcode;
 use vm::machine::Machine;
 
@@ -23,7 +24,7 @@ impl Machine {
             Opcode::Nop => self.nop(),
             Opcode::SCF => self.set_carry_flag(),
             Opcode::CCF => self.complement_carry_flag(),
-            Opcode::CPL => self.complement_registers(|cpu| &mut cpu.registers.af.0),
+            Opcode::CPL => self.complement_registers(Registers::to_a()),
             Opcode::Halt => self.halt(),
 
             Opcode::Exx => self.shadow_exchange_bc_de_hl(),
@@ -31,58 +32,58 @@ impl Machine {
             Opcode::ExDEHL => self.exhange_de_with_hl(),
             Opcode::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
 
-            Opcode::IncA => self.increment_register(|cpu| &mut cpu.registers.af.0),
-            Opcode::IncB => self.increment_register(|cpu| &mut cpu.registers.bc.0),
-            Opcode::IncC => self.increment_register(|cpu| &mut cpu.registers.bc.1),
-            Opcode::IncD => self.increment_register(|cpu| &mut cpu.registers.de.0),
-            Opcode::IncE => self.increment_register(|cpu| &mut cpu.registers.de.1),
-            Opcode::IncH => self.increment_register(|cpu| &mut cpu.registers.hl.0),
-            Opcode::IncL => self.increment_register(|cpu| &mut cpu.registers.hl.1),
+            Opcode::IncA => self.increment_register(Registers::to_a()),
+            Opcode::IncB => self.increment_register(Registers::to_b()),
+            Opcode::IncC => self.increment_register(Registers::to_c()),
+            Opcode::IncD => self.increment_register(Registers::to_d()),
+            Opcode::IncE => self.increment_register(Registers::to_e()),
+            Opcode::IncH => self.increment_register(Registers::to_h()),
+            Opcode::IncL => self.increment_register(Registers::to_l()),
 
-            Opcode::DecA => self.decrement_register(|cpu| &mut cpu.registers.af.0),
-            Opcode::DecB => self.decrement_register(|cpu| &mut cpu.registers.bc.0),
-            Opcode::DecC => self.decrement_register(|cpu| &mut cpu.registers.bc.1),
-            Opcode::DecD => self.decrement_register(|cpu| &mut cpu.registers.de.0),
-            Opcode::DecE => self.decrement_register(|cpu| &mut cpu.registers.de.1),
-            Opcode::DecH => self.decrement_register(|cpu| &mut cpu.registers.hl.0),
-            Opcode::DecL => self.decrement_register(|cpu| &mut cpu.registers.hl.1),
+            Opcode::DecA => self.decrement_register(Registers::to_a()),
+            Opcode::DecB => self.decrement_register(Registers::to_b()),
+            Opcode::DecC => self.decrement_register(Registers::to_c()),
+            Opcode::DecD => self.decrement_register(Registers::to_d()),
+            Opcode::DecE => self.decrement_register(Registers::to_e()),
+            Opcode::DecH => self.decrement_register(Registers::to_h()),
+            Opcode::DecL => self.decrement_register(Registers::to_l()),
 
-            Opcode::IncBC => self.increment_register_pair(|cpu| &mut cpu.registers.bc),
-            Opcode::IncDE => self.increment_register_pair(|cpu| &mut cpu.registers.de),
-            Opcode::IncHL => self.increment_register_pair(|cpu| &mut cpu.registers.hl),
-            Opcode::IncSP => self.increment_register_pair(|cpu| &mut cpu.sp),
+            Opcode::IncBC => self.increment_register_pair(Registers::to_bc()),
+            Opcode::IncDE => self.increment_register_pair(Registers::to_de()),
+            Opcode::IncHL => self.increment_register_pair(Registers::to_hl()),
+            Opcode::IncSP => self.increment_register_pair(Registers::to_sp()),
             Opcode::IncVHL => self.increment_memory(),
 
-            Opcode::DecBC => self.decrement_register_pair(|cpu| &mut cpu.registers.bc),
-            Opcode::DecDE => self.decrement_register_pair(|cpu| &mut cpu.registers.de),
-            Opcode::DecHL => self.decrement_register_pair(|cpu| &mut cpu.registers.hl),
-            Opcode::DecSP => self.decrement_register_pair(|cpu| &mut cpu.sp),
+            Opcode::DecBC => self.decrement_register_pair(Registers::to_bc()),
+            Opcode::DecDE => self.decrement_register_pair(Registers::to_de()),
+            Opcode::DecHL => self.decrement_register_pair(Registers::to_hl()),
+            Opcode::DecSP => self.decrement_register_pair(Registers::to_sp()),
             Opcode::DecVHL => self.decrement_memory(),
 
-            Opcode::AddA => self.add_register(|cpu| cpu.registers.af.0),
-            Opcode::AddB => self.add_register(|cpu| cpu.registers.bc.0),
-            Opcode::AddC => self.add_register(|cpu| cpu.registers.bc.1),
-            Opcode::AddD => self.add_register(|cpu| cpu.registers.de.0),
-            Opcode::AddE => self.add_register(|cpu| cpu.registers.de.1),
-            Opcode::AddH => self.add_register(|cpu| cpu.registers.hl.0),
-            Opcode::AddL => self.add_register(|cpu| cpu.registers.hl.1),
+            Opcode::AddA => self.add_register(Registers::from_a()),
+            Opcode::AddB => self.add_register(Registers::from_b()),
+            Opcode::AddC => self.add_register(Registers::from_c()),
+            Opcode::AddD => self.add_register(Registers::from_d()),
+            Opcode::AddE => self.add_register(Registers::from_e()),
+            Opcode::AddH => self.add_register(Registers::from_h()),
+            Opcode::AddL => self.add_register(Registers::from_l()),
             Opcode::AddVHL => self.add_memory(),
 
-            Opcode::SubA => self.subtract_register(|cpu| cpu.registers.af.0),
-            Opcode::SubB => self.subtract_register(|cpu| cpu.registers.bc.0),
-            Opcode::SubC => self.subtract_register(|cpu| cpu.registers.bc.1),
-            Opcode::SubD => self.subtract_register(|cpu| cpu.registers.de.0),
-            Opcode::SubE => self.subtract_register(|cpu| cpu.registers.de.1),
-            Opcode::SubH => self.subtract_register(|cpu| cpu.registers.hl.0),
-            Opcode::SubL => self.subtract_register(|cpu| cpu.registers.hl.1),
+            Opcode::SubA => self.subtract_register(Registers::from_a()),
+            Opcode::SubB => self.subtract_register(Registers::from_b()),
+            Opcode::SubC => self.subtract_register(Registers::from_c()),
+            Opcode::SubD => self.subtract_register(Registers::from_d()),
+            Opcode::SubE => self.subtract_register(Registers::from_e()),
+            Opcode::SubH => self.subtract_register(Registers::from_h()),
+            Opcode::SubL => self.subtract_register(Registers::from_l()),
             Opcode::SubVHL => self.sub_memory(),
 
-            Opcode::AddHLBC => self.add_register_pair_to_hl(|cpu| cpu.registers.bc),
-            Opcode::AddHLDE => self.add_register_pair_to_hl(|cpu| cpu.registers.de),
-            Opcode::AddHLHL => self.add_register_pair_to_hl(|cpu| cpu.registers.hl),
-            Opcode::AddHLSP => self.add_register_pair_to_hl(|cpu| cpu.sp),
+            Opcode::AddHLBC => self.add_register_pair_to_hl(Registers::from_bc()),
+            Opcode::AddHLDE => self.add_register_pair_to_hl(Registers::from_de()),
+            Opcode::AddHLHL => self.add_register_pair_to_hl(Registers::from_hl()),
+            Opcode::AddHLSP => self.add_register_pair_to_hl(Registers::from_sp()),
 
-            Opcode::AdcA => self.add_carry_register(|cpu| cpu.registers.af.0),
+            Opcode::AdcA => self.add_carry_register(Registers::from_a()),
             Opcode::AdcB => self.add_carry_register(|cpu| cpu.registers.bc.0),
             Opcode::AdcC => self.add_carry_register(|cpu| cpu.registers.bc.1),
             Opcode::AdcD => self.add_carry_register(|cpu| cpu.registers.de.0),
@@ -90,7 +91,7 @@ impl Machine {
             Opcode::AdcH => self.add_carry_register(|cpu| cpu.registers.hl.0),
             Opcode::AdcL => self.add_carry_register(|cpu| cpu.registers.hl.1),
 
-            Opcode::SbcA => self.subtract_carry_register(|cpu| cpu.registers.af.0),
+            Opcode::SbcA => self.subtract_carry_register(Registers::from_a()),
             Opcode::SbcB => self.subtract_carry_register(|cpu| cpu.registers.bc.0),
             Opcode::SbcC => self.subtract_carry_register(|cpu| cpu.registers.bc.1),
             Opcode::SbcD => self.subtract_carry_register(|cpu| cpu.registers.de.0),
@@ -141,200 +142,161 @@ impl Machine {
             Opcode::LdHLXX => self.load_into_register_pair(|cpu| &mut cpu.registers.hl),
             Opcode::LdSPXX => self.load_into_register_pair(|cpu| &mut cpu.sp),
 
-            Opcode::LdVBCA => {
-                self.load_into_memory(|cpu| cpu.registers.af.0, |cpu| cpu.registers.bc)
+            Opcode::LdVBCA => self.load_into_memory(Registers::from_a(), Registers::from_bc()),
+            Opcode::LdVDEA => self.load_into_memory(Registers::from_a(), Registers::from_de()),
+            Opcode::LdAVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_a())
             }
-            Opcode::LdVDEA => {
-                self.load_into_memory(|cpu| cpu.registers.af.0, |cpu| cpu.registers.de)
+            Opcode::LdBVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_b())
             }
-            Opcode::LdAVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.af.0),
-            Opcode::LdBVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.bc.0),
-            Opcode::LdCVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.bc.1),
-            Opcode::LdDVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.de.0),
-            Opcode::LdEVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.de.1),
-            Opcode::LdHVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.hl.0),
-            Opcode::LdLVHL => self
-                .load_memory_into_register(|cpu| cpu.registers.hl, |cpu| &mut cpu.registers.hl.1),
+            Opcode::LdCVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_c())
+            }
+            Opcode::LdDVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_d())
+            }
+            Opcode::LdEVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_e())
+            }
+            Opcode::LdHVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_h())
+            }
+            Opcode::LdLVHL => {
+                self.load_memory_into_register(Registers::from_hl(), Registers::to_l())
+            }
 
-            Opcode::LdBA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
-            Opcode::LdBB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
-            Opcode::LdBC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
-            Opcode::LdBD => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
-            Opcode::LdBE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
-            Opcode::LdBH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
-            Opcode::LdBL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.bc.0,
-            ),
+            Opcode::LdBA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_b())
+            }
+            Opcode::LdBB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_b())
+            }
+            Opcode::LdBC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_b())
+            }
+            Opcode::LdBD => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_b())
+            }
+            Opcode::LdBE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_b())
+            }
+            Opcode::LdBH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_b())
+            }
+            Opcode::LdBL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_b())
+            }
 
-            Opcode::LdCA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
-            Opcode::LdCB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
-            Opcode::LdCC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
-            Opcode::LdCD => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
-            Opcode::LdCE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
-            Opcode::LdCH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
-            Opcode::LdCL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.bc.1,
-            ),
+            Opcode::LdCA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_c())
+            }
+            Opcode::LdCB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_c())
+            }
+            Opcode::LdCC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_c())
+            }
+            Opcode::LdCD => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_c())
+            }
+            Opcode::LdCE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_c())
+            }
+            Opcode::LdCH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_c())
+            }
+            Opcode::LdCL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_c())
+            }
 
-            Opcode::LdDA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.de.0,
-            ),
-            Opcode::LdDB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.de.0,
-            ),
-            Opcode::LdDC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.de.0,
-            ),
-            Opcode::LdDD => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.de.0,
-            ),
-            Opcode::LdDE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.de.0,
-            ),
-            Opcode::LdDH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.de.0,
-            ),
-            Opcode::LdDL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.de.0,
-            ),
+            Opcode::LdDA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_d())
+            }
+            Opcode::LdDB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_d())
+            }
+            Opcode::LdDC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_d())
+            }
+            Opcode::LdDD => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_d())
+            }
+            Opcode::LdDE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_d())
+            }
+            Opcode::LdDH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_d())
+            }
+            Opcode::LdDL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_d())
+            }
 
-            Opcode::LdEA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.de.1,
-            ),
-            Opcode::LdEB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.de.1,
-            ),
-            Opcode::LdEC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.de.1,
-            ),
-            Opcode::LdED => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.de.1,
-            ),
-            Opcode::LdEE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.de.1,
-            ),
-            Opcode::LdEH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.de.1,
-            ),
-            Opcode::LdEL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.de.1,
-            ),
+            Opcode::LdEA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_e())
+            }
+            Opcode::LdEB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_e())
+            }
+            Opcode::LdEC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_e())
+            }
+            Opcode::LdED => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_e())
+            }
+            Opcode::LdEE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_e())
+            }
+            Opcode::LdEH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_e())
+            }
+            Opcode::LdEL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_e())
+            }
 
-            Opcode::LdHA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
-            Opcode::LdHB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
-            Opcode::LdHC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
-            Opcode::LdHD => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
-            Opcode::LdHE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
-            Opcode::LdHH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
-            Opcode::LdHL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.hl.0,
-            ),
+            Opcode::LdHA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_h())
+            }
+            Opcode::LdHB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_h())
+            }
+            Opcode::LdHC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_h())
+            }
+            Opcode::LdHD => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_h())
+            }
+            Opcode::LdHE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_h())
+            }
+            Opcode::LdHH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_h())
+            }
+            Opcode::LdHL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_h())
+            }
 
-            Opcode::LdLA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
-            Opcode::LdLB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
-            Opcode::LdLC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
-            Opcode::LdLD => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
-            Opcode::LdLE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
-            Opcode::LdLH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
-            Opcode::LdLL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.hl.1,
-            ),
+            Opcode::LdLA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_l())
+            }
+            Opcode::LdLB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_l())
+            }
+            Opcode::LdLC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_l())
+            }
+            Opcode::LdLD => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_l())
+            }
+            Opcode::LdLE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_l())
+            }
+            Opcode::LdLH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_l())
+            }
+            Opcode::LdLL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_l())
+            }
 
             Opcode::LdHLA => {
                 self.load_register_into_memory(|cpu| cpu.registers.af.0, |cpu| cpu.registers.hl)
@@ -358,42 +320,35 @@ impl Machine {
                 self.load_register_into_memory(|cpu| cpu.registers.hl.1, |cpu| cpu.registers.hl)
             }
 
-            Opcode::LdAA => self.load_register_into_register(
-                |cpu| cpu.registers.af.0,
-                |cpu| &mut cpu.registers.af.0,
-            ),
-            Opcode::LdAB => self.load_register_into_register(
-                |cpu| cpu.registers.bc.0,
-                |cpu| &mut cpu.registers.af.0,
-            ),
-            Opcode::LdAC => self.load_register_into_register(
-                |cpu| cpu.registers.bc.1,
-                |cpu| &mut cpu.registers.af.0,
-            ),
-            Opcode::LdAD => self.load_register_into_register(
-                |cpu| cpu.registers.de.0,
-                |cpu| &mut cpu.registers.af.0,
-            ),
-            Opcode::LdAE => self.load_register_into_register(
-                |cpu| cpu.registers.de.1,
-                |cpu| &mut cpu.registers.af.0,
-            ),
-            Opcode::LdAH => self.load_register_into_register(
-                |cpu| cpu.registers.hl.0,
-                |cpu| &mut cpu.registers.af.0,
-            ),
-            Opcode::LdAL => self.load_register_into_register(
-                |cpu| cpu.registers.hl.1,
-                |cpu| &mut cpu.registers.af.0,
-            ),
+            Opcode::LdAA => {
+                self.load_register_into_register(Registers::from_a(), Registers::to_a())
+            }
+            Opcode::LdAB => {
+                self.load_register_into_register(Registers::from_b(), Registers::to_a())
+            }
+            Opcode::LdAC => {
+                self.load_register_into_register(Registers::from_c(), Registers::to_a())
+            }
+            Opcode::LdAD => {
+                self.load_register_into_register(Registers::from_d(), Registers::to_a())
+            }
+            Opcode::LdAE => {
+                self.load_register_into_register(Registers::from_e(), Registers::to_a())
+            }
+            Opcode::LdAH => {
+                self.load_register_into_register(Registers::from_h(), Registers::to_a())
+            }
+            Opcode::LdAL => {
+                self.load_register_into_register(Registers::from_l(), Registers::to_a())
+            }
 
-            Opcode::LdAX => self.load_into_register(|cpu| &mut cpu.registers.af.0),
-            Opcode::LdBX => self.load_into_register(|cpu| &mut cpu.registers.bc.0),
-            Opcode::LdCX => self.load_into_register(|cpu| &mut cpu.registers.bc.1),
-            Opcode::LdDX => self.load_into_register(|cpu| &mut cpu.registers.de.0),
-            Opcode::LdEX => self.load_into_register(|cpu| &mut cpu.registers.de.1),
-            Opcode::LdHX => self.load_into_register(|cpu| &mut cpu.registers.hl.0),
-            Opcode::LdLX => self.load_into_register(|cpu| &mut cpu.registers.hl.1),
+            Opcode::LdAX => self.load_into_register(Registers::to_a()),
+            Opcode::LdBX => self.load_into_register(Registers::to_b()),
+            Opcode::LdCX => self.load_into_register(Registers::to_c()),
+            Opcode::LdDX => self.load_into_register(Registers::to_d()),
+            Opcode::LdEX => self.load_into_register(Registers::to_e()),
+            Opcode::LdHX => self.load_into_register(Registers::to_h()),
+            Opcode::LdLX => self.load_into_register(Registers::to_l()),
 
             Opcode::LdAVBC => self
                 .load_memory_into_register(|cpu| cpu.registers.bc, |cpu| &mut cpu.registers.af.0),
@@ -407,42 +362,42 @@ impl Machine {
             Opcode::LdAVXX => self.load_param_memory_into_register(|cpu| &mut cpu.registers.af.0),
             Opcode::LdVHLX => self.load_param_into_memory(|cpu| cpu.registers.hl),
 
-            Opcode::AndA => self.and_register(|cpu| cpu.registers.af.0),
-            Opcode::AndB => self.and_register(|cpu| cpu.registers.bc.0),
-            Opcode::AndC => self.and_register(|cpu| cpu.registers.bc.1),
-            Opcode::AndD => self.and_register(|cpu| cpu.registers.de.0),
-            Opcode::AndE => self.and_register(|cpu| cpu.registers.de.1),
-            Opcode::AndH => self.and_register(|cpu| cpu.registers.hl.0),
-            Opcode::AndL => self.and_register(|cpu| cpu.registers.hl.1),
+            Opcode::AndA => self.and_register(Registers::from_a()),
+            Opcode::AndB => self.and_register(Registers::from_b()),
+            Opcode::AndC => self.and_register(Registers::from_c()),
+            Opcode::AndD => self.and_register(Registers::from_d()),
+            Opcode::AndE => self.and_register(Registers::from_e()),
+            Opcode::AndH => self.and_register(Registers::from_h()),
+            Opcode::AndL => self.and_register(Registers::from_l()),
             Opcode::AndX => self.and_value(),
 
-            Opcode::OrA => self.or_register(|cpu| cpu.registers.af.0),
-            Opcode::OrB => self.or_register(|cpu| cpu.registers.bc.0),
-            Opcode::OrC => self.or_register(|cpu| cpu.registers.bc.1),
-            Opcode::OrD => self.or_register(|cpu| cpu.registers.de.0),
-            Opcode::OrE => self.or_register(|cpu| cpu.registers.de.1),
-            Opcode::OrH => self.or_register(|cpu| cpu.registers.hl.0),
-            Opcode::OrL => self.or_register(|cpu| cpu.registers.hl.1),
+            Opcode::OrA => self.or_register(Registers::from_a()),
+            Opcode::OrB => self.or_register(Registers::from_b()),
+            Opcode::OrC => self.or_register(Registers::from_c()),
+            Opcode::OrD => self.or_register(Registers::from_d()),
+            Opcode::OrE => self.or_register(Registers::from_e()),
+            Opcode::OrH => self.or_register(Registers::from_h()),
+            Opcode::OrL => self.or_register(Registers::from_l()),
             Opcode::OrX => self.or_value(),
 
-            Opcode::XorA => self.xor_register(|cpu| cpu.registers.af.0),
-            Opcode::XorB => self.xor_register(|cpu| cpu.registers.bc.0),
-            Opcode::XorC => self.xor_register(|cpu| cpu.registers.bc.1),
-            Opcode::XorD => self.xor_register(|cpu| cpu.registers.de.0),
-            Opcode::XorE => self.xor_register(|cpu| cpu.registers.de.1),
-            Opcode::XorH => self.xor_register(|cpu| cpu.registers.hl.0),
-            Opcode::XorL => self.xor_register(|cpu| cpu.registers.hl.1),
+            Opcode::XorA => self.xor_register(Registers::from_a()),
+            Opcode::XorB => self.xor_register(Registers::from_b()),
+            Opcode::XorC => self.xor_register(Registers::from_c()),
+            Opcode::XorD => self.xor_register(Registers::from_d()),
+            Opcode::XorE => self.xor_register(Registers::from_e()),
+            Opcode::XorH => self.xor_register(Registers::from_h()),
+            Opcode::XorL => self.xor_register(Registers::from_l()),
             Opcode::XorX => self.xor_value(),
 
-            Opcode::PushAF => self.push_to_stack(|cpu| cpu.registers.af),
-            Opcode::PushBC => self.push_to_stack(|cpu| cpu.registers.bc),
-            Opcode::PushDE => self.push_to_stack(|cpu| cpu.registers.de),
-            Opcode::PushHL => self.push_to_stack(|cpu| cpu.registers.hl),
+            Opcode::PushAF => self.push_to_stack(Registers::from_af()),
+            Opcode::PushBC => self.push_to_stack(Registers::from_bc()),
+            Opcode::PushDE => self.push_to_stack(Registers::from_de()),
+            Opcode::PushHL => self.push_to_stack(Registers::from_hl()),
 
-            Opcode::PopAF => self.pop_from_stack(|cpu| &mut cpu.registers.af),
-            Opcode::PopBC => self.pop_from_stack(|cpu| &mut cpu.registers.bc),
-            Opcode::PopDE => self.pop_from_stack(|cpu| &mut cpu.registers.de),
-            Opcode::PopHL => self.pop_from_stack(|cpu| &mut cpu.registers.hl),
+            Opcode::PopAF => self.pop_from_stack(Registers::to_af()),
+            Opcode::PopBC => self.pop_from_stack(Registers::to_bc()),
+            Opcode::PopDE => self.pop_from_stack(Registers::to_de()),
+            Opcode::PopHL => self.pop_from_stack(Registers::to_hl()),
 
             Opcode::RLCA => self.rotate_accumulator_copy_left(),
             Opcode::RRCA => self.rotate_accumulator_copy_right(),
