@@ -25,6 +25,7 @@ Ideally, the core should be fully portable and idiomatic Rust.
 * We do not use a comma separator for the arguments. For example, `add a, b` becomes `AddAB` in our identifiers.
 * We use V (for "value") as a dereference indicator. For example, `(HL)` in the manual becomes `VHL` in our identifiers.
 * We use X for memory reads at the location pointed by the PC. For example, `ld bc, **` becomes `LdBCXX` in our identifiers.
+* The instruction implementations should be found in groups that match those in the official Zilog Z80 User Manual.
 
 ## Contributors
 
