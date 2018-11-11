@@ -2,7 +2,7 @@ use program::Program;
 use vm::cpu::alu;
 use vm::cpu::processor::Processor;
 use vm::cpu::state::State;
-use vm::ram::memory::Memory;
+use vm::ram::Memory;
 
 pub struct Machine {
     pub cpu: Processor,
