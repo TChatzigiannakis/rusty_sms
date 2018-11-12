@@ -21,55 +21,55 @@ impl Registers {
         }
     }
 
-    pub fn from_af() -> DoubleRegisterSelector {
+    pub fn af() -> DoubleRegisterSelector {
         |cpu| cpu.registers.af
     }
 
-    pub fn from_bc() -> DoubleRegisterSelector {
+    pub fn bc() -> DoubleRegisterSelector {
         |cpu| cpu.registers.bc
     }
 
-    pub fn from_de() -> DoubleRegisterSelector {
+    pub fn de() -> DoubleRegisterSelector {
         |cpu| cpu.registers.de
     }
 
-    pub fn from_hl() -> DoubleRegisterSelector {
+    pub fn hl() -> DoubleRegisterSelector {
         |cpu| cpu.registers.hl
     }
 
-    pub fn from_sp() -> DoubleRegisterSelector {
+    pub fn sp() -> DoubleRegisterSelector {
         |cpu| cpu.sp
     }
 
-    pub fn from_a() -> RegisterSelector {
+    pub fn a() -> RegisterSelector {
         |cpu| cpu.registers.af.0
     }
 
-    pub fn from_f() -> RegisterSelector {
+    pub fn f() -> RegisterSelector {
         |cpu| cpu.registers.af.1
     }
 
-    pub fn from_b() -> RegisterSelector {
+    pub fn b() -> RegisterSelector {
         |cpu| cpu.registers.bc.0
     }
 
-    pub fn from_c() -> RegisterSelector {
+    pub fn c() -> RegisterSelector {
         |cpu| cpu.registers.bc.1
     }
 
-    pub fn from_d() -> RegisterSelector {
+    pub fn d() -> RegisterSelector {
         |cpu| cpu.registers.de.0
     }
 
-    pub fn from_e() -> RegisterSelector {
+    pub fn e() -> RegisterSelector {
         |cpu| cpu.registers.de.1
     }
 
-    pub fn from_h() -> RegisterSelector {
+    pub fn h() -> RegisterSelector {
         |cpu| cpu.registers.hl.0
     }
 
-    pub fn from_l() -> RegisterSelector {
+    pub fn l() -> RegisterSelector {
         |cpu| cpu.registers.hl.1
     }
 
