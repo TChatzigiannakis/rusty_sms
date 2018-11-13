@@ -230,13 +230,13 @@ impl Machine {
             Opcode::LdAH => self.load_register_into_register(Registers::h(), Registers::into_a()),
             Opcode::LdAL => self.load_register_into_register(Registers::l(), Registers::into_a()),
 
-            Opcode::LdAX => self.load_into_register(Registers::into_a()),
-            Opcode::LdBX => self.load_into_register(Registers::into_b()),
-            Opcode::LdCX => self.load_into_register(Registers::into_c()),
-            Opcode::LdDX => self.load_into_register(Registers::into_d()),
-            Opcode::LdEX => self.load_into_register(Registers::into_e()),
-            Opcode::LdHX => self.load_into_register(Registers::into_h()),
-            Opcode::LdLX => self.load_into_register(Registers::into_l()),
+            Opcode::LdAX => self.load_value_into_register(Registers::into_a()),
+            Opcode::LdBX => self.load_value_into_register(Registers::into_b()),
+            Opcode::LdCX => self.load_value_into_register(Registers::into_c()),
+            Opcode::LdDX => self.load_value_into_register(Registers::into_d()),
+            Opcode::LdEX => self.load_value_into_register(Registers::into_e()),
+            Opcode::LdHX => self.load_value_into_register(Registers::into_h()),
+            Opcode::LdLX => self.load_value_into_register(Registers::into_l()),
 
             Opcode::LdAVBC => {
                 self.load_memory_into_register(Registers::address_in_bc(), Registers::into_a())

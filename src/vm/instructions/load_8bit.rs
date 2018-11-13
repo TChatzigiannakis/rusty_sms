@@ -61,7 +61,7 @@ impl Machine {
         self.clock(13);
     }
 
-    pub(crate) fn load_into_register(&mut self, selector: fn(&mut State) -> &mut u8) {
+    pub(crate) fn load_value_into_register(&mut self, selector: fn(&mut State) -> &mut u8) {
         let value = self.next_byte();
         *selector(&mut self.cpu.state) = value;
         self.clock(7);
