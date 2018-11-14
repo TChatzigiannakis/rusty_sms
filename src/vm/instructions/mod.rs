@@ -90,6 +90,7 @@ impl Machine {
             Opcode::AdcE => self.add_carry_register(Registers::e()),
             Opcode::AdcH => self.add_carry_register(Registers::h()),
             Opcode::AdcL => self.add_carry_register(Registers::l()),
+            Opcode::AdcAVHL => self.add_carry_memory(),
 
             Opcode::SbcA => self.subtract_carry_register(Registers::a()),
             Opcode::SbcB => self.subtract_carry_register(Registers::b()),

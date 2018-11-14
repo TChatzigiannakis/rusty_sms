@@ -1,6 +1,7 @@
 use vm::cpu::alu;
 use vm::cpu::flags::Flag;
 use vm::cpu::operation::Operation;
+use vm::cpu::registers::Registers;
 use vm::cpu::state::State;
 use vm::machine::Machine;
 
@@ -11,6 +12,26 @@ impl Machine {
 
     pub(crate) fn add_carry_register(&mut self, selector: fn(&State) -> u8) {
         self.op_carry_register(Operation::Add, selector);
+    }
+
+    pub(crate) fn add_carry_memory(&mut self) {
+        let address = self.get_register_pair(Registers::hl());
+        let operand = self.ram.read_u8(address);
+        let carry = Flag::Carry.get_bit(&self.cpu.state);
+        self.operate_on_register(
+            Operation::Add,
+            |cpu| &mut cpu.registers.af.0,
+            operand + carry,
+            &[
+                Flag::AddSubtract,
+                Flag::Carry,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::Sign,
+                Flag::Zero,
+            ],
+        );
+        self.clock(7);
     }
 
     pub(crate) fn subtract_register(&mut self, selector: fn(&State) -> u8) {

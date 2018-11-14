@@ -150,6 +150,7 @@ pub enum Opcode {
     AdcE = 0x8B,
     AdcH = 0x8C,
     AdcL = 0x8D,
+    AdcAVHL = 0x8E,
     AdcA = 0x8F,
 
     SubB = 0x90,
