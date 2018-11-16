@@ -201,6 +201,7 @@ pub enum Opcode {
     RetZ = 0xC8,
     Ret = 0xC9,
     JpZXX = 0xCA,
+    BITS = 0xCB,
     CallZXX = 0xCC,
     CallXX = 0xCD,
 

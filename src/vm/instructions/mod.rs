@@ -1,5 +1,6 @@
 mod arithmetic_16bit;
 mod arithmetic_8bit;
+mod bits;
 mod bitwise;
 mod call_return;
 mod control;
@@ -21,6 +22,8 @@ impl Machine {
     pub fn execute(&mut self) {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
+            Opcode::BITS => self.execute_bits(),
+
             Opcode::Nop => self.nop(),
             Opcode::SCF => self.set_carry_flag(),
             Opcode::CCF => self.complement_carry_flag(),
