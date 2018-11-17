@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use program::Program;
+    use vm::callbacks::Callbacks;
     use vm::cpu::alu;
     use vm::cpu::flags::Flag;
     use vm::cpu::registers::Registers;
@@ -53,22 +54,25 @@ mod tests {
 
     #[test]
     fn increment() {
-        let range = || 0..256;
-        let mut vm = new_vm(|_| {}, range().map(|_| Opcode::IncA).collect(), 0);
-        for iteration in range() {
-            let i = iteration as u8;
-            let a = vm.get_register(|cpu| cpu.registers.af.0);
-            let h = Flag::HalfCarry.get(&vm.cpu.state);
-            let s = Flag::Sign.get(&vm.cpu.state);
-            let ov = Flag::ParityOverflow.get(&vm.cpu.state);
-            assert_eq!(i, a);
-            assert_eq!(i >= 0x80, s, "At value {}.", i);
-            assert_eq!(i == 0x80, ov, "At value {}.", i);
-            if i > 0 {
-                assert_eq!(i & 0x0F == 0, h, "At value {}.", i);
+        let mut vm = new_vm(|_| {}, (0..256).map(|_| Opcode::IncA).collect(), 0);
+        let mut callbacks = Callbacks::new();
+        let mut i = 0;
+        callbacks.on_before_instruction_exec(Box::new(move |machine, instr| {
+            if instr == Opcode::IncA {
+                let a = machine.get_register(Registers::a());
+                let h = Flag::HalfCarry.get(&machine.cpu.state);
+                let s = Flag::Sign.get(&machine.cpu.state);
+                let ov = Flag::ParityOverflow.get(&machine.cpu.state);
+                assert_eq!(i, a);
+                assert_eq!(i >= 0x80, s, "At value {}.", i);
+                assert_eq!(i == 0x80, ov, "At value {}.", i);
+                if i > 0 {
+                    assert_eq!(i & 0x0F == 0, h, "At value {}.", i);
+                }
+                i = i.wrapping_add(1);
             }
-            vm.execute();
-        }
+        }));
+        vm.start_with_options(0, &mut callbacks);
     }
 
     #[test]

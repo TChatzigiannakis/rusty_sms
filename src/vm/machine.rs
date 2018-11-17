@@ -8,7 +8,6 @@ use vm::ram::Memory;
 pub struct Machine {
     pub cpu: Processor,
     pub ram: Memory,
-    pub callbacks: Callbacks,
 }
 
 impl Machine {
@@ -16,7 +15,6 @@ impl Machine {
         Machine {
             cpu: Processor::new(),
             ram: Memory::new(),
-            callbacks: Callbacks::new(),
         }
     }
 
@@ -38,16 +36,20 @@ impl Machine {
     }
 
     pub fn start_at(&mut self, address: u16) {
-        self.cpu.halt();
-        self.cpu.goto(address);
-        self.cpu.unhalt();
-        while !self.cpu.is_halted() {
-            self.execute();
-        }
+        self.start_with_options(address, &mut Callbacks::new())
     }
 
     pub fn start(&mut self) {
         self.start_at(0);
+    }
+
+    pub fn start_with_options(&mut self, address: u16, callbacks: &mut Callbacks) {
+        self.cpu.halt();
+        self.cpu.goto(address);
+        self.cpu.unhalt();
+        while !self.cpu.is_halted() {
+            self.execute_with(callbacks);
+        }
     }
 
     pub fn get_register<T>(&self, selector: fn(&State) -> T) -> T {

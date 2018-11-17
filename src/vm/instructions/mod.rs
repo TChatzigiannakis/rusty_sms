@@ -12,6 +12,7 @@ pub mod opcodes;
 mod rotate_shift;
 mod stack;
 
+use vm::callbacks::Callbacks;
 use vm::cpu::alu;
 use vm::cpu::flags::Flag;
 use vm::cpu::registers::Registers;
@@ -20,10 +21,14 @@ use vm::machine::Machine;
 
 impl Machine {
     pub fn execute(&mut self) {
-        self.callbacks.do_before_instruction_fetch(self, 0);
+        self.execute_with(&mut Callbacks::new());
+    }
+
+    pub fn execute_with(&mut self, callbacks: &mut Callbacks) {
+        callbacks.do_before_instruction_fetch(self);
         let opcode = Opcode::from(self.next_byte());
 
-        self.callbacks.do_before_instruction_exec(self, opcode);
+        callbacks.do_before_instruction_exec(self, opcode);
         match opcode {
             Opcode::BITS => self.execute_bits(),
 
@@ -299,7 +304,7 @@ impl Machine {
             Opcode::RLA => self.rotate_accumulator_left(),
             Opcode::RRA => self.rotate_accumulator_right(),
         }
-        self.callbacks.do_after_instruction_exec(self, opcode);
+        callbacks.do_after_instruction_exec(self, opcode);
     }
 
     fn next_byte(&mut self) -> u8 {
