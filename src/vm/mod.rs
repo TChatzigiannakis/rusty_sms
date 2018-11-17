@@ -1,5 +1,6 @@
 use vm::cpu::state::State;
 
+pub mod callbacks;
 pub mod cpu;
 pub mod instructions;
 pub mod machine;

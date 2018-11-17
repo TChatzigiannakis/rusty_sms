@@ -19,7 +19,10 @@ use vm::machine::Machine;
 
 impl Machine {
     pub fn execute(&mut self) {
+        self.callbacks.do_before_instruction_fetch(self, 0);
         let opcode = Opcode::from(self.next_byte());
+
+        self.callbacks.do_before_instruction_exec(self, opcode);
         match opcode {
             Opcode::Nop => self.nop(),
             Opcode::SCF => self.set_carry_flag(),
@@ -293,6 +296,7 @@ impl Machine {
             Opcode::RLA => self.rotate_accumulator_left(),
             Opcode::RRA => self.rotate_accumulator_right(),
         }
+        self.callbacks.do_after_instruction_exec(self, opcode);
     }
 
     fn next_byte(&mut self) -> u8 {

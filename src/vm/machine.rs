@@ -1,4 +1,5 @@
 use program::Program;
+use vm::callbacks::Callbacks;
 use vm::cpu::alu;
 use vm::cpu::processor::Processor;
 use vm::cpu::state::State;
@@ -7,6 +8,7 @@ use vm::ram::Memory;
 pub struct Machine {
     pub cpu: Processor,
     pub ram: Memory,
+    pub callbacks: Callbacks,
 }
 
 impl Machine {
@@ -14,6 +16,7 @@ impl Machine {
         Machine {
             cpu: Processor::new(),
             ram: Memory::new(),
+            callbacks: Callbacks::new(),
         }
     }
 
