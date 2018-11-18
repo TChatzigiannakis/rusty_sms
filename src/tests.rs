@@ -57,8 +57,9 @@ mod tests {
         let mut vm = new_vm(|_| {}, (0..256).map(|_| Opcode::IncA).collect(), 0);
         let mut callbacks = Callbacks::new();
         let mut i = 0;
-        callbacks.on_before_instruction_exec(Box::new(move |machine, instr| {
-            if instr == Opcode::IncA {
+        callbacks.on_before_instruction_exec_match(
+            Opcode::IncA,
+            Box::new(move |machine| {
                 let a = machine.get_register(Registers::a());
                 let h = Flag::HalfCarry.get(&machine.cpu.state);
                 let s = Flag::Sign.get(&machine.cpu.state);
@@ -70,8 +71,8 @@ mod tests {
                     assert_eq!(i & 0x0F == 0, h, "At value {}.", i);
                 }
                 i = i.wrapping_add(1);
-            }
-        }));
+            }),
+        );
         vm.start_with_options(0, &mut callbacks);
     }
 
@@ -80,13 +81,14 @@ mod tests {
         let mut vm = new_vm(|_| {}, (0..65536).map(|_| Opcode::IncBC).collect(), 0);
         let mut callbacks = Callbacks::new();
         let mut i = 0;
-        callbacks.on_before_instruction_exec(Box::new(move |machine, instr| {
-            if instr == Opcode::IncBC {
+        callbacks.on_before_instruction_exec_match(
+            Opcode::IncBC,
+            Box::new(move |machine| {
                 let bc = machine.get_register_pair(|cpu| cpu.registers.bc);
                 assert_eq!(i, bc);
                 i = i.wrapping_add(1);
-            }
-        }));
+            }),
+        );
         vm.start_with_options(0, &mut callbacks);
     }
 

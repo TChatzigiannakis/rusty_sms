@@ -28,6 +28,7 @@ impl Machine {
         callbacks.do_before_instruction_fetch(self);
         let opcode = Opcode::from(self.next_byte());
 
+        callbacks.do_before_instruction_exec_match(self, opcode);
         callbacks.do_before_instruction_exec(self, opcode);
         match opcode {
             Opcode::BITS => self.execute_bits(),
@@ -305,6 +306,7 @@ impl Machine {
             Opcode::RRA => self.rotate_accumulator_right(),
         }
         callbacks.do_after_instruction_exec(self, opcode);
+        callbacks.do_after_instruction_exec_match(self, opcode);
     }
 
     fn next_byte(&mut self) -> u8 {
