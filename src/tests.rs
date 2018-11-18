@@ -77,14 +77,17 @@ mod tests {
 
     #[test]
     fn increment_pair() {
-        let range = || 0..65536;
-        let mut vm = new_vm(|_| {}, range().map(|_| Opcode::IncBC).collect(), 0);
-        for iteration in range() {
-            let i = iteration as u16;
-            let bc = vm.get_register_pair(|cpu| cpu.registers.bc);
-            assert_eq!(i, bc);
-            vm.execute();
-        }
+        let mut vm = new_vm(|_| {}, (0..65536).map(|_| Opcode::IncBC).collect(), 0);
+        let mut callbacks = Callbacks::new();
+        let mut i = 0;
+        callbacks.on_before_instruction_exec(Box::new(move |machine, instr| {
+            if instr == Opcode::IncBC {
+                let bc = machine.get_register_pair(|cpu| cpu.registers.bc);
+                assert_eq!(i, bc);
+                i = i.wrapping_add(1);
+            }
+        }));
+        vm.start_with_options(0, &mut callbacks);
     }
 
     #[test]
