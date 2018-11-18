@@ -3,12 +3,12 @@ use vm::instructions::opcodes::Opcode;
 use vm::machine::Machine;
 
 pub struct Callbacks {
-    before_instruction_fetch: Vec<Box<FnMut(&Machine)>>,
-    before_instruction_exec: Vec<Box<FnMut(&Machine, Opcode)>>,
-    after_instruction_exec: Vec<Box<FnMut(&Machine, Opcode)>>,
+    before_instruction_fetch: Vec<Box<FnMut(&mut Machine)>>,
+    before_instruction_exec: Vec<Box<FnMut(&mut Machine, Opcode)>>,
+    after_instruction_exec: Vec<Box<FnMut(&mut Machine, Opcode)>>,
 
-    before_instruction_exec_match: HashMap<Opcode, Vec<Box<FnMut(&Machine)>>>,
-    after_instruction_exec_match: HashMap<Opcode, Vec<Box<FnMut(&Machine)>>>,
+    before_instruction_exec_match: HashMap<Opcode, Vec<Box<FnMut(&mut Machine)>>>,
+    after_instruction_exec_match: HashMap<Opcode, Vec<Box<FnMut(&mut Machine)>>>,
 }
 
 impl Callbacks {
@@ -23,31 +23,35 @@ impl Callbacks {
         }
     }
 
-    pub fn on_before_instruction_fetch(&mut self, callback: Box<FnMut(&Machine)>) {
+    pub fn on_before_instruction_fetch(&mut self, callback: Box<FnMut(&mut Machine)>) {
         self.before_instruction_fetch.push(callback);
     }
 
-    pub(crate) fn do_before_instruction_fetch(&mut self, machine: &Machine) {
+    pub(crate) fn do_before_instruction_fetch(&mut self, machine: &mut Machine) {
         for c in &mut self.before_instruction_fetch {
             c(machine);
         }
     }
 
-    pub fn on_before_instruction_exec(&mut self, callback: Box<FnMut(&Machine, Opcode)>) {
+    pub fn on_before_instruction_exec(&mut self, callback: Box<FnMut(&mut Machine, Opcode)>) {
         self.before_instruction_exec.push(callback);
     }
 
-    pub(crate) fn do_before_instruction_exec(&mut self, machine: &Machine, instruction: Opcode) {
+    pub(crate) fn do_before_instruction_exec(
+        &mut self,
+        machine: &mut Machine,
+        instruction: Opcode,
+    ) {
         for c in &mut self.before_instruction_exec {
             c(machine, instruction);
         }
     }
 
-    pub fn on_after_instruction_exec(&mut self, callback: Box<FnMut(&Machine, Opcode)>) {
+    pub fn on_after_instruction_exec(&mut self, callback: Box<FnMut(&mut Machine, Opcode)>) {
         self.after_instruction_exec.push(callback);
     }
 
-    pub(crate) fn do_after_instruction_exec(&mut self, machine: &Machine, instruction: Opcode) {
+    pub(crate) fn do_after_instruction_exec(&mut self, machine: &mut Machine, instruction: Opcode) {
         for c in &mut self.after_instruction_exec {
             c(machine, instruction);
         }
@@ -56,7 +60,7 @@ impl Callbacks {
     pub fn on_before_instruction_exec_match(
         &mut self,
         instruction: Opcode,
-        callback: Box<FnMut(&Machine)>,
+        callback: Box<FnMut(&mut Machine)>,
     ) {
         if !self
             .before_instruction_exec_match
@@ -71,7 +75,7 @@ impl Callbacks {
 
     pub(crate) fn do_before_instruction_exec_match(
         &mut self,
-        machine: &Machine,
+        machine: &mut Machine,
         instruction: Opcode,
     ) {
         if self
@@ -91,7 +95,7 @@ impl Callbacks {
     pub fn on_after_instruction_exec_match(
         &mut self,
         instruction: Opcode,
-        callback: Box<FnMut(&Machine)>,
+        callback: Box<FnMut(&mut Machine)>,
     ) {
         if !self.after_instruction_exec_match.contains_key(&instruction) {
             self.after_instruction_exec_match
@@ -103,7 +107,7 @@ impl Callbacks {
 
     pub(crate) fn do_after_instruction_exec_match(
         &mut self,
-        machine: &Machine,
+        machine: &mut Machine,
         instruction: Opcode,
     ) {
         if self.after_instruction_exec_match.contains_key(&instruction) {
