@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum Opcode {
     Nop = 0x00,
