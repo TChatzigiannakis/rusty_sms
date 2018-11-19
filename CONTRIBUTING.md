@@ -26,7 +26,7 @@ Ideally, the core should be fully portable and idiomatic Rust.
 * We use V (for "value") as a dereference indicator. For example, `(HL)` in the manual becomes `VHL` in our identifiers.
 * We use X for memory reads at the location pointed by the PC. For example, `ld bc, **` becomes `LdBCXX` in our identifiers.
 * The instruction implementations should be found in individual files that map to the instruction groups as described in the official Zilog Z80 User Manual.
-* Extended instructions should be in their own folders.
+* Extended instructions groups should be in their own folders.
 
 ## Contributors
 
