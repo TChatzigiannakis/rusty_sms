@@ -18,14 +18,12 @@ mod tests {
         vm
     }
 
-    fn run_program(regs: fn(&mut Registers), stream: Vec<Opcode>) -> Machine {
-        let mut vm = new_vm(regs, stream, 0);
-        vm.start();
-        vm
-    }
-
-    fn run_program_from_default_state(stream: Vec<Opcode>) -> Machine {
-        run_program(|_| {}, stream)
+    #[test]
+    fn stop() {
+        let mut vm = new_vm(|_| {}, vec![], 0);
+        let mut callbacks = Callbacks::new();
+        callbacks.on_before_instruction_exec_match(Opcode::Nop, Box::new(|m| m.stop()));
+        vm.start_with_options(0, &mut callbacks);
     }
 
     #[test]
@@ -73,6 +71,7 @@ mod tests {
                 i = i.wrapping_add(1);
             }),
         );
+        callbacks.on_before_instruction_exec_match(Opcode::Nop, Box::new(|m| m.stop()));
         vm.start_with_options(0, &mut callbacks);
     }
 
@@ -89,100 +88,73 @@ mod tests {
                 i = i.wrapping_add(1);
             }),
         );
+        callbacks.on_before_instruction_exec_match(Opcode::Nop, Box::new(|m| m.stop()));
         vm.start_with_options(0, &mut callbacks);
     }
 
     #[test]
     fn add() {
-        let mut vm = run_program(
+        let mut vm = new_vm(
             |regs| {
-                regs.af.0 = 0x7E;
                 regs.bc.0 = 0x01;
             },
-            vec![Opcode::AddB, Opcode::Halt],
+            (0..256).map(|_| Opcode::AddB).collect(),
+            0,
         );
-
-        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x7F);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state));
-        assert!(!Flag::Sign.get(&vm.cpu.state));
-        assert!(!Flag::Carry.get(&vm.cpu.state));
-
-        vm.start_at(0);
-        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x80);
-        assert!(Flag::ParityOverflow.get(&vm.cpu.state));
-        assert!(Flag::Sign.get(&vm.cpu.state));
-        assert!(!Flag::Carry.get(&vm.cpu.state));
-
-        vm.start_at(0);
-        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x81);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state));
-        assert!(Flag::Sign.get(&vm.cpu.state));
-        assert!(!Flag::Carry.get(&vm.cpu.state));
-
-        vm.cpu.state.registers.af.0 = 0xFF;
-        vm.start_at(0);
-        assert_eq!(vm.get_register(|cpu| cpu.registers.af.0), 0x00);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state));
-        assert!(!Flag::Sign.get(&vm.cpu.state));
-        assert!(Flag::Carry.get(&vm.cpu.state));
+        let mut callbacks = Callbacks::new();
+        let mut i = 0;
+        callbacks.on_before_instruction_exec_match(
+            Opcode::AddB,
+            Box::new(move |machine| {
+                let a = machine.get_register(Registers::a());
+                let b = machine.get_register(Registers::b());
+                let h = Flag::HalfCarry.get(&machine.cpu.state);
+                let s = Flag::Sign.get(&machine.cpu.state);
+                let ov = Flag::ParityOverflow.get(&machine.cpu.state);
+                assert_eq!(i, a);
+                assert_eq!(i >= 0x80, s, "At value {}.", i);
+                assert_eq!(i == 0x80, ov, "At value {}.", i);
+                if i > 0 {
+                    assert_eq!(i & 0x0F == 0, h, "At value {}.", i);
+                }
+                i = i.wrapping_add(b);
+            }),
+        );
+        callbacks.on_before_instruction_exec_match(Opcode::Nop, Box::new(|m| m.stop()));
+        vm.start_with_options(0, &mut callbacks);
     }
 
-    #[test]
-    fn increment_wide() {
-        let mut vm = run_program(
-            |regs| regs.bc = (0x00, 0xFE),
-            vec![Opcode::IncBC, Opcode::Halt],
-        );
-        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x00, 0xFF));
-
-        vm.start_at(0);
-        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x01, 0x00));
-    }
-
-    #[test]
-    fn decrement_wide() {
-        let mut vm = run_program(
-            |regs| regs.bc = (0x01, 0x00),
-            vec![Opcode::DecBC, Opcode::Halt],
-        );
-        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x00, 0xFF));
-
-        vm.start_at(0);
-        assert_eq!(vm.get_register(|cpu| cpu.registers.bc), (0x00, 0xFE));
-    }
-
-    fn jump_test_flag(opcode: Opcode, param: u16, flag: Flag, flag_value: bool, expected: u16) {
+    fn jump_test_flag(varient: Opcode, target: u16, flag: Flag, value: bool, expected: u16) {
         let mut vm = Machine::new();
         let mut p = Program::new();
-        p.add_param_word(opcode, param);
-        p.add(Opcode::Halt);
-        p.add(Opcode::Halt);
-        vm.load(&p);
-        flag.set(&mut vm.cpu.state, flag_value);
-        vm.start();
-        let pc = alu::get_word(vm.cpu.state.pc);
-        assert_eq!(pc, expected);
+        p.add_param_word(varient, target);
+        vm.load_at(&p, 0);
+        flag.set(&mut vm.cpu.state, value);
+
+        let mut callbacks = Callbacks::new();
+        callbacks.on_after_instruction_exec(Box::new(|m, _| m.stop()));
+        vm.start_with_options(0, &mut callbacks);
+
+        let pc = vm.get_register_pair(|cpu| cpu.pc);
+        assert_eq!(expected, pc);
+    }
+
+    fn jump_test_dual(variant: Opcode, flag: Flag, value: bool) {
+        jump_test_flag(variant, 0x10, flag, value, 0x10);
+        jump_test_flag(variant, 0x10, flag, !value, 0x03);
     }
 
     #[test]
     fn jump() {
-        jump_test_flag(Opcode::JpXX, 0x04, Flag::Unused1, true, 0x05);
-        jump_test_flag(Opcode::JpNZXX, 0x04, Flag::Zero, false, 0x05);
-        jump_test_flag(Opcode::JpNZXX, 0x04, Flag::Zero, true, 0x04);
-        jump_test_flag(Opcode::JpZXX, 0x04, Flag::Zero, true, 0x05);
-        jump_test_flag(Opcode::JpZXX, 0x04, Flag::Zero, false, 0x04);
-        jump_test_flag(Opcode::JpNCXX, 0x04, Flag::Carry, false, 0x05);
-        jump_test_flag(Opcode::JpNCXX, 0x04, Flag::Carry, true, 0x04);
-        jump_test_flag(Opcode::JpCXX, 0x04, Flag::Carry, true, 0x05);
-        jump_test_flag(Opcode::JpCXX, 0x04, Flag::Carry, false, 0x04);
-        jump_test_flag(Opcode::JpPOXX, 0x04, Flag::ParityOverflow, true, 0x05);
-        jump_test_flag(Opcode::JpPOXX, 0x04, Flag::ParityOverflow, false, 0x04);
-        jump_test_flag(Opcode::JpPEXX, 0x04, Flag::ParityOverflow, false, 0x05);
-        jump_test_flag(Opcode::JpPEXX, 0x04, Flag::ParityOverflow, true, 0x04);
-        jump_test_flag(Opcode::JpPXX, 0x04, Flag::Sign, false, 0x05);
-        jump_test_flag(Opcode::JpPXX, 0x04, Flag::Sign, true, 0x04);
-        jump_test_flag(Opcode::JpMXX, 0x04, Flag::Sign, true, 0x05);
-        jump_test_flag(Opcode::JpMXX, 0x04, Flag::Sign, false, 0x04);
+        jump_test_flag(Opcode::JpXX, 0x10, Flag::Unused1, false, 0x10);
+        jump_test_dual(Opcode::JpNZXX, Flag::Zero, false);
+        jump_test_dual(Opcode::JpZXX, Flag::Zero, true);
+        jump_test_dual(Opcode::JpNCXX, Flag::Carry, false);
+        jump_test_dual(Opcode::JpCXX, Flag::Carry, true);
+        jump_test_dual(Opcode::JpPOXX, Flag::ParityOverflow, true);
+        jump_test_dual(Opcode::JpPEXX, Flag::ParityOverflow, false);
+        jump_test_dual(Opcode::JpPXX, Flag::Sign, false);
+        jump_test_dual(Opcode::JpMXX, Flag::Sign, true);
     }
 
     #[test]

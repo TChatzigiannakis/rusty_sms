@@ -10,7 +10,7 @@ impl Processor {
     pub fn new() -> Processor {
         Processor {
             state: State::new(),
-            halted: true,
+            halted: false,
         }
     }
 

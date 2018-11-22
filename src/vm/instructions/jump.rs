@@ -4,8 +4,8 @@ use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn jump(&mut self, condition: fn(&State) -> bool) {
+        let destination = self.next_word();
         if condition(&self.cpu.state) {
-            let destination = self.next_word();
             self.cpu.goto(destination);
         }
         self.clock(10);

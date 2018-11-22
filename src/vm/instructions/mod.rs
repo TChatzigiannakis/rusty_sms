@@ -26,10 +26,11 @@ impl Machine {
 
     pub fn execute_with(&mut self, callbacks: &mut Callbacks) {
         callbacks.do_before_instruction_fetch(self);
-        let opcode = Opcode::from(self.next_byte());
 
+        let opcode = Opcode::from(self.next_byte());
         callbacks.do_before_instruction_exec_match(self, opcode);
         callbacks.do_before_instruction_exec(self, opcode);
+
         match opcode {
             Opcode::BITS => self.execute_bits(),
 
@@ -305,6 +306,7 @@ impl Machine {
             Opcode::RLA => self.rotate_accumulator_left(),
             Opcode::RRA => self.rotate_accumulator_right(),
         }
+
         callbacks.do_after_instruction_exec(self, opcode);
         callbacks.do_after_instruction_exec_match(self, opcode);
     }
@@ -314,7 +316,7 @@ impl Machine {
         let val = self.ram.read_u8(pc);
         let (result, overflow) = pc.overflowing_add(1);
         if overflow {
-            self.cpu.halt();
+            self.stop();
         } else {
             self.cpu.state.pc = alu::get_octets(result);
         }
