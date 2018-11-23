@@ -1,3 +1,4 @@
+use element::Element;
 use vm::instructions::opcodes::Opcode;
 
 pub struct Program {
@@ -13,8 +14,8 @@ impl Program {
         &self.bin
     }
 
-    pub fn add(&mut self, opcode: Opcode) {
-        self.bin.push(opcode as u8);
+    pub fn add(&mut self, element: Element) {
+        self.bin.push(element.get_u8());
     }
 
     pub fn add_param(&mut self, opcode: Opcode, parameter: u8) {

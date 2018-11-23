@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use element::Element::Instruction;
+    use element::Element::Parameter;
     use program::Program;
     use vm::callbacks::Callbacks;
     use vm::cpu::alu;
@@ -161,7 +163,7 @@ mod tests {
     fn load() {
         let mut vm = Machine::new();
         let mut p = Program::new();
-        p.add(Opcode::LdBC);
+        p.add(Instruction(Opcode::LdBC));
         vm.load(&p);
 
         vm.cpu.state.registers.bc = (0x00, 0x20);
@@ -175,7 +177,8 @@ mod tests {
     fn load_param() {
         let mut vm = Machine::new();
         let mut p = Program::new();
-        p.add_param(Opcode::LdBX, 0x42);
+        p.add(Instruction(Opcode::LdBX));
+        p.add(Parameter(0x42));
         vm.load(&p);
 
         vm.cpu.state.registers.bc = (0x00, 0x00);

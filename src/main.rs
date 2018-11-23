@@ -2,6 +2,7 @@
 
 extern crate num;
 
+mod element;
 mod program;
 mod tests;
 mod vm;
