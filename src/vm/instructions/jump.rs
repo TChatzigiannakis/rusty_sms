@@ -12,8 +12,8 @@ impl Machine {
     }
 
     pub(crate) fn jump_relative(&mut self, condition: fn(&State) -> bool) {
+        let offset = self.next_byte();
         if condition(&self.cpu.state) {
-            let offset = self.next_byte();
             let pc = alu::get_word(self.cpu.state.pc) - 1;
             let (destination, _) = pc.overflowing_add(offset as u16);
             self.cpu.goto(destination);
@@ -31,7 +31,7 @@ impl Machine {
         self.set_register(|s| &mut s.registers.bc.0, r);
         if r != 0 {
             let target = alu::get_octets(alu::add_words(pc, e).value);
-            self.set_register(|s| &mut s.pc, target);
+            self.cpu.goto(alu::get_word(target));
             self.clock(3);
         } else {
             self.clock(2);
