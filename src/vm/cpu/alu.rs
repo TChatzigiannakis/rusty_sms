@@ -95,3 +95,29 @@ pub(crate) fn add_words(a: u16, b: u16) -> AdderResult<u16> {
         overflow: overflow,
     }
 }
+
+#[test]
+#[cfg(test)]
+fn nibbles() {
+    for iteration in 0..256 {
+        let i = iteration as u8;
+        let r = add_octets(i, 1);
+        assert_eq!(i.wrapping_add(1), r.value, "At {}.", i);
+        assert_eq!(i == 0xFF, r.carry, "At {}.", i);
+        assert_eq!((i & 0x0F) == 0x0F, r.half_carry, "At {}.", i);
+        assert_eq!(i == 0x7F, r.overflow, "At {}.", i);
+    }
+}
+
+#[test]
+#[cfg(test)]
+fn words() {
+    for iteration in 0..65536 {
+        let i = iteration as u16;
+        let r = add_words(i, 1);
+        assert_eq!(i.wrapping_add(1), r.value, "At {}.", i);
+        assert_eq!(i == 0xFFFF, r.carry, "At {}.", i);
+        assert_eq!((i & 0x0FFF) == 0x0FFF, r.half_carry, "At {}.", i);
+        assert_eq!(i == 0x7FFF, r.overflow, "At {}.", i);
+    }
+}
