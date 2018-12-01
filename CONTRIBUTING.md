@@ -35,3 +35,4 @@ Username|Contributions
 [TChatzigiannakis](https://github.com/TChatzigiannakis)|Architecture, instruction set (8-bit and 16-bit arithmetic, exchange, control)
 [Vassalware](https://github.com/Vassalware)|Instruction set (load, call, return, jump)
 [raidenfreeman](https://github.com/raidenfreeman)|Instruction set (8-bit arithmetic, bitwise)
+[GeorgeChatzikonstantis](https://github.com/GeorgeChatzikonstantis)|Instruction set (8-bit arithmetic)
