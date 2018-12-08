@@ -2,6 +2,7 @@
 name = "rusty_sms"
 version = "0.1.0"
 authors = ["Theodoros Chatzigiannakis <tchatzigiannakis@gmail.com>"]
+edition = '2018'
 
 [dependencies]
 num = "0.2.0"
