@@ -1,5 +1,5 @@
-use vm::cpu::alu;
-use vm::cpu::registers::Registers;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::registers::Registers;
 
 pub struct State {
     pub registers: Registers,

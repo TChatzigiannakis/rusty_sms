@@ -1,5 +1,5 @@
-use element::Element;
-use vm::instructions::opcodes::Opcode;
+use crate::element::Element;
+use crate::vm::instructions::opcodes::Opcode;
 
 pub struct Program {
     bin: Vec<u8>,

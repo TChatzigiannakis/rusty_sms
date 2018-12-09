@@ -12,12 +12,12 @@ pub mod opcodes;
 mod rotate_shift;
 mod stack;
 
-use vm::callbacks::Callbacks;
-use vm::cpu::alu;
-use vm::cpu::flags::Flag;
-use vm::cpu::registers::Registers;
-use vm::instructions::opcodes::Opcode;
-use vm::machine::Machine;
+use crate::vm::callbacks::Callbacks;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::flags::Flag;
+use crate::vm::cpu::registers::Registers;
+use crate::vm::instructions::opcodes::Opcode;
+use crate::vm::machine::Machine;
 
 impl Machine {
     pub fn execute(&mut self) {

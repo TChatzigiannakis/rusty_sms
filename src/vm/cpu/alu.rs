@@ -1,8 +1,8 @@
+use crate::vm::cpu::nibble::Nibble;
 use num::One;
 use num::Zero;
 use std::ops::Add;
 use std::ops::Not;
-use vm::cpu::nibble::Nibble;
 
 #[derive(Copy, Clone)]
 pub(crate) struct AdderResult<T: Copy + Clone> {

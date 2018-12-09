@@ -1,6 +1,6 @@
-use vm::cpu::flags::Flag;
-use vm::cpu::state::State;
-use vm::machine::Machine;
+use crate::vm::cpu::flags::Flag;
+use crate::vm::cpu::state::State;
+use crate::vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn nop(&mut self) {

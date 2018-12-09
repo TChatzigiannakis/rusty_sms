@@ -1,6 +1,6 @@
+use crate::vm::instructions::opcodes::Opcode;
+use crate::vm::machine::Machine;
 use std::collections::HashMap;
-use vm::instructions::opcodes::Opcode;
-use vm::machine::Machine;
 
 pub struct Callbacks {
     before_instruction_fetch: Vec<Box<FnMut(&mut Machine)>>,

@@ -1,5 +1,5 @@
-use vm::cpu::alu;
-use vm::{
+use crate::vm::cpu::alu;
+use crate::vm::{
     AddressSelector, DoubleRegisterSelector, Register, RegisterSelector,
     TargetDoubleRegisterSelector, TargetRegisterSelector,
 };

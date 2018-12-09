@@ -1,9 +1,9 @@
-use vm::cpu::alu;
-use vm::cpu::flags::Flag;
-use vm::cpu::operation::Operation;
-use vm::cpu::registers::Registers;
-use vm::cpu::state::State;
-use vm::machine::Machine;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::flags::Flag;
+use crate::vm::cpu::operation::Operation;
+use crate::vm::cpu::registers::Registers;
+use crate::vm::cpu::state::State;
+use crate::vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn add_register(&mut self, selector: fn(&State) -> u8) {

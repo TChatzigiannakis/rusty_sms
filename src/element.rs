@@ -1,6 +1,6 @@
-use element::Element::Instruction;
-use element::Element::Parameter;
-use vm::instructions::opcodes::Opcode;
+use crate::element::Element::Instruction;
+use crate::element::Element::Parameter;
+use crate::vm::instructions::opcodes::Opcode;
 
 pub enum Element {
     Instruction(Opcode),

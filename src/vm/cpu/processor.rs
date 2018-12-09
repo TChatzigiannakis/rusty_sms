@@ -1,5 +1,5 @@
-use vm::cpu::alu;
-use vm::cpu::state::State;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::state::State;
 
 pub struct Processor {
     pub state: State,

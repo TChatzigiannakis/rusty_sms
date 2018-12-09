@@ -1,7 +1,7 @@
-use vm::cpu::alu;
-use vm::cpu::state::State;
-use vm::machine::Machine;
-use vm::AddressSelector;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::state::State;
+use crate::vm::machine::Machine;
+use crate::vm::AddressSelector;
 
 impl Machine {
     pub(crate) fn load_register_into_register(

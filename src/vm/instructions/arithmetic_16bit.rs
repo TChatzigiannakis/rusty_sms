@@ -1,8 +1,8 @@
-use vm::cpu::alu;
-use vm::cpu::flags::Flag;
-use vm::cpu::operation::Operation;
-use vm::cpu::state::State;
-use vm::machine::Machine;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::flags::Flag;
+use crate::vm::cpu::operation::Operation;
+use crate::vm::cpu::state::State;
+use crate::vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn increment_register_pair(&mut self, target: fn(&mut State) -> &mut (u8, u8)) {

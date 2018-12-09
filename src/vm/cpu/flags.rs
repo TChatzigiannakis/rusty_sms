@@ -1,5 +1,5 @@
+use crate::vm::cpu::state::State;
 use std::collections::HashMap;
-use vm::cpu::state::State;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[repr(u8)]

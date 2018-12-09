@@ -1,4 +1,4 @@
-use vm::cpu::state::State;
+use crate::vm::cpu::state::State;
 
 pub mod callbacks;
 pub mod cpu;

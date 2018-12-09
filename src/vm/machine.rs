@@ -1,9 +1,9 @@
-use program::Program;
-use vm::callbacks::Callbacks;
-use vm::cpu::alu;
-use vm::cpu::processor::Processor;
-use vm::cpu::state::State;
-use vm::ram::Memory;
+use crate::program::Program;
+use crate::vm::callbacks::Callbacks;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::processor::Processor;
+use crate::vm::cpu::state::State;
+use crate::vm::ram::Memory;
 
 pub struct Machine {
     pub cpu: Processor,

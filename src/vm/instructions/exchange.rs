@@ -1,8 +1,8 @@
+use crate::vm::cpu::alu;
+use crate::vm::cpu::registers::Registers;
+use crate::vm::cpu::state::State;
+use crate::vm::machine::Machine;
 use std::mem;
-use vm::cpu::alu;
-use vm::cpu::registers::Registers;
-use vm::cpu::state::State;
-use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn shadow_exchange_af(&mut self) {

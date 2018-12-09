@@ -1,6 +1,6 @@
-use vm::cpu::alu;
-use vm::cpu::flags::Flag;
-use vm::machine::Machine;
+use crate::vm::cpu::alu;
+use crate::vm::cpu::flags::Flag;
+use crate::vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn rotate_accumulator_copy_left(&mut self) {

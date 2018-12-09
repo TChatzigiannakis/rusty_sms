@@ -1,4 +1,4 @@
-use vm::cpu::alu;
+use crate::vm::cpu::alu;
 
 pub struct Memory {
     data: [u8; 65536],

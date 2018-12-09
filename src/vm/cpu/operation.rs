@@ -1,7 +1,7 @@
+use crate::vm::cpu::alu;
 use num::One;
 use std::ops::Add;
 use std::ops::Not;
-use vm::cpu::alu;
 
 #[derive(Copy, Clone, PartialEq)]
 #[repr(u8)]

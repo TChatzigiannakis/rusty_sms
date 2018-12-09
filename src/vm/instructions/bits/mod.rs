@@ -1,6 +1,6 @@
 mod opcodes;
 
-use vm::machine::Machine;
+use crate::vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn execute_bits(&mut self) {
