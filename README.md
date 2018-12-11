@@ -3,7 +3,7 @@
 A work-in-progress Sega Master System emulator in a very early development stage.
 
 # Building from source
-Make sure to update your Rust toolchain to the latest version (`rustup update`) and then run the included tests with
+Make sure to update your Rust 2018 toolchain to the latest version (`rustup update`) and then run the included tests using:
 
 ```
 cargo test
