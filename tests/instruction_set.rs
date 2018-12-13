@@ -4,7 +4,6 @@ use rusty_sms::element::Element::Instruction;
 use rusty_sms::element::Element::Parameter;
 use rusty_sms::program::Program;
 use rusty_sms::vm::callbacks::Callbacks;
-use rusty_sms::vm::cpu::alu;
 use rusty_sms::vm::cpu::flags::Flag;
 use rusty_sms::vm::cpu::registers::Registers;
 use rusty_sms::vm::instructions::opcodes::Opcode;
