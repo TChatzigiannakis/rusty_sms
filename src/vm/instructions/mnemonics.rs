@@ -1,6 +1,6 @@
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[repr(u8)]
-pub enum Opcode {
+pub enum Mnemonic {
     Nop = 0x00,
     LdBCXX = 0x01,
     LdVBCA = 0x02,
@@ -239,8 +239,8 @@ pub enum Opcode {
     CallMXX = 0xFC,
 }
 
-impl From<u8> for Opcode {
+impl From<u8> for Mnemonic {
     fn from(value: u8) -> Self {
-        unsafe { ::std::mem::transmute_copy::<u8, Opcode>(&value) }
+        unsafe { ::std::mem::transmute_copy::<u8, Mnemonic>(&value) }
     }
 }

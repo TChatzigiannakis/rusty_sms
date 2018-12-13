@@ -1,9 +1,9 @@
 use crate::element::Element::Instruction;
 use crate::element::Element::Parameter;
-use crate::vm::instructions::opcodes::Opcode;
+use crate::vm::instructions::mnemonics::Mnemonic;
 
 pub enum Element {
-    Instruction(Opcode),
+    Instruction(Mnemonic),
     Parameter(u8),
 }
 

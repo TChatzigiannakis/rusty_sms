@@ -8,7 +8,7 @@ mod exchange;
 mod jump;
 mod load_16bit;
 mod load_8bit;
-pub mod opcodes;
+pub mod mnemonics;
 mod rotate_shift;
 mod stack;
 
@@ -16,7 +16,7 @@ use crate::vm::callbacks::Callbacks;
 use crate::vm::cpu::alu;
 use crate::vm::cpu::flags::Flag;
 use crate::vm::cpu::registers::Registers;
-use crate::vm::instructions::opcodes::Opcode;
+use crate::vm::instructions::mnemonics::Mnemonic;
 use crate::vm::machine::Machine;
 
 impl Machine {
@@ -27,288 +27,288 @@ impl Machine {
     pub fn execute_with(&mut self, callbacks: &mut Callbacks) {
         callbacks.do_before_instruction_fetch(self);
 
-        let opcode = Opcode::from(self.next_byte());
-        callbacks.do_before_instruction_exec_match(self, opcode);
-        callbacks.do_before_instruction_exec(self, opcode);
+        let instruction = Mnemonic::from(self.next_byte());
+        callbacks.do_before_instruction_exec_match(self, instruction);
+        callbacks.do_before_instruction_exec(self, instruction);
 
-        match opcode {
-            Opcode::BITS => self.execute_bits(),
+        match instruction {
+            Mnemonic::BITS => self.execute_bits(),
 
-            Opcode::Nop => self.nop(),
-            Opcode::SCF => self.set_carry_flag(),
-            Opcode::CCF => self.complement_carry_flag(),
-            Opcode::CPL => self.complement_registers(Registers::into_a()),
-            Opcode::Halt => self.halt(),
+            Mnemonic::Nop => self.nop(),
+            Mnemonic::SCF => self.set_carry_flag(),
+            Mnemonic::CCF => self.complement_carry_flag(),
+            Mnemonic::CPL => self.complement_registers(Registers::into_a()),
+            Mnemonic::Halt => self.halt(),
 
-            Opcode::Exx => self.shadow_exchange_bc_de_hl(),
-            Opcode::ExAFAF => self.shadow_exchange_af(),
-            Opcode::ExDEHL => self.exhange_de_with_hl(),
-            Opcode::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
+            Mnemonic::Exx => self.shadow_exchange_bc_de_hl(),
+            Mnemonic::ExAFAF => self.shadow_exchange_af(),
+            Mnemonic::ExDEHL => self.exhange_de_with_hl(),
+            Mnemonic::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
 
-            Opcode::IncA => self.increment_register(Registers::into_a()),
-            Opcode::IncB => self.increment_register(Registers::into_b()),
-            Opcode::IncC => self.increment_register(Registers::into_c()),
-            Opcode::IncD => self.increment_register(Registers::into_d()),
-            Opcode::IncE => self.increment_register(Registers::into_e()),
-            Opcode::IncH => self.increment_register(Registers::into_h()),
-            Opcode::IncL => self.increment_register(Registers::into_l()),
+            Mnemonic::IncA => self.increment_register(Registers::into_a()),
+            Mnemonic::IncB => self.increment_register(Registers::into_b()),
+            Mnemonic::IncC => self.increment_register(Registers::into_c()),
+            Mnemonic::IncD => self.increment_register(Registers::into_d()),
+            Mnemonic::IncE => self.increment_register(Registers::into_e()),
+            Mnemonic::IncH => self.increment_register(Registers::into_h()),
+            Mnemonic::IncL => self.increment_register(Registers::into_l()),
 
-            Opcode::DecA => self.decrement_register(Registers::into_a()),
-            Opcode::DecB => self.decrement_register(Registers::into_b()),
-            Opcode::DecC => self.decrement_register(Registers::into_c()),
-            Opcode::DecD => self.decrement_register(Registers::into_d()),
-            Opcode::DecE => self.decrement_register(Registers::into_e()),
-            Opcode::DecH => self.decrement_register(Registers::into_h()),
-            Opcode::DecL => self.decrement_register(Registers::into_l()),
+            Mnemonic::DecA => self.decrement_register(Registers::into_a()),
+            Mnemonic::DecB => self.decrement_register(Registers::into_b()),
+            Mnemonic::DecC => self.decrement_register(Registers::into_c()),
+            Mnemonic::DecD => self.decrement_register(Registers::into_d()),
+            Mnemonic::DecE => self.decrement_register(Registers::into_e()),
+            Mnemonic::DecH => self.decrement_register(Registers::into_h()),
+            Mnemonic::DecL => self.decrement_register(Registers::into_l()),
 
-            Opcode::IncBC => self.increment_register_pair(Registers::into_bc()),
-            Opcode::IncDE => self.increment_register_pair(Registers::into_de()),
-            Opcode::IncHL => self.increment_register_pair(Registers::into_hl()),
-            Opcode::IncSP => self.increment_register_pair(Registers::into_sp()),
-            Opcode::IncVHL => self.increment_memory(),
+            Mnemonic::IncBC => self.increment_register_pair(Registers::into_bc()),
+            Mnemonic::IncDE => self.increment_register_pair(Registers::into_de()),
+            Mnemonic::IncHL => self.increment_register_pair(Registers::into_hl()),
+            Mnemonic::IncSP => self.increment_register_pair(Registers::into_sp()),
+            Mnemonic::IncVHL => self.increment_memory(),
 
-            Opcode::DecBC => self.decrement_register_pair(Registers::into_bc()),
-            Opcode::DecDE => self.decrement_register_pair(Registers::into_de()),
-            Opcode::DecHL => self.decrement_register_pair(Registers::into_hl()),
-            Opcode::DecSP => self.decrement_register_pair(Registers::into_sp()),
-            Opcode::DecVHL => self.decrement_memory(),
+            Mnemonic::DecBC => self.decrement_register_pair(Registers::into_bc()),
+            Mnemonic::DecDE => self.decrement_register_pair(Registers::into_de()),
+            Mnemonic::DecHL => self.decrement_register_pair(Registers::into_hl()),
+            Mnemonic::DecSP => self.decrement_register_pair(Registers::into_sp()),
+            Mnemonic::DecVHL => self.decrement_memory(),
 
-            Opcode::AddA => self.add_register(Registers::a()),
-            Opcode::AddB => self.add_register(Registers::b()),
-            Opcode::AddC => self.add_register(Registers::c()),
-            Opcode::AddD => self.add_register(Registers::d()),
-            Opcode::AddE => self.add_register(Registers::e()),
-            Opcode::AddH => self.add_register(Registers::h()),
-            Opcode::AddL => self.add_register(Registers::l()),
-            Opcode::AddVHL => self.add_memory(),
+            Mnemonic::AddA => self.add_register(Registers::a()),
+            Mnemonic::AddB => self.add_register(Registers::b()),
+            Mnemonic::AddC => self.add_register(Registers::c()),
+            Mnemonic::AddD => self.add_register(Registers::d()),
+            Mnemonic::AddE => self.add_register(Registers::e()),
+            Mnemonic::AddH => self.add_register(Registers::h()),
+            Mnemonic::AddL => self.add_register(Registers::l()),
+            Mnemonic::AddVHL => self.add_memory(),
 
-            Opcode::SubA => self.subtract_register(Registers::a()),
-            Opcode::SubB => self.subtract_register(Registers::b()),
-            Opcode::SubC => self.subtract_register(Registers::c()),
-            Opcode::SubD => self.subtract_register(Registers::d()),
-            Opcode::SubE => self.subtract_register(Registers::e()),
-            Opcode::SubH => self.subtract_register(Registers::h()),
-            Opcode::SubL => self.subtract_register(Registers::l()),
-            Opcode::SubVHL => self.sub_memory(),
+            Mnemonic::SubA => self.subtract_register(Registers::a()),
+            Mnemonic::SubB => self.subtract_register(Registers::b()),
+            Mnemonic::SubC => self.subtract_register(Registers::c()),
+            Mnemonic::SubD => self.subtract_register(Registers::d()),
+            Mnemonic::SubE => self.subtract_register(Registers::e()),
+            Mnemonic::SubH => self.subtract_register(Registers::h()),
+            Mnemonic::SubL => self.subtract_register(Registers::l()),
+            Mnemonic::SubVHL => self.sub_memory(),
 
-            Opcode::AddHLBC => self.add_register_pair_to_hl(Registers::bc()),
-            Opcode::AddHLDE => self.add_register_pair_to_hl(Registers::de()),
-            Opcode::AddHLHL => self.add_register_pair_to_hl(Registers::hl()),
-            Opcode::AddHLSP => self.add_register_pair_to_hl(Registers::sp()),
+            Mnemonic::AddHLBC => self.add_register_pair_to_hl(Registers::bc()),
+            Mnemonic::AddHLDE => self.add_register_pair_to_hl(Registers::de()),
+            Mnemonic::AddHLHL => self.add_register_pair_to_hl(Registers::hl()),
+            Mnemonic::AddHLSP => self.add_register_pair_to_hl(Registers::sp()),
 
-            Opcode::AdcA => self.add_carry_register(Registers::a()),
-            Opcode::AdcB => self.add_carry_register(Registers::b()),
-            Opcode::AdcC => self.add_carry_register(Registers::c()),
-            Opcode::AdcD => self.add_carry_register(Registers::d()),
-            Opcode::AdcE => self.add_carry_register(Registers::e()),
-            Opcode::AdcH => self.add_carry_register(Registers::h()),
-            Opcode::AdcL => self.add_carry_register(Registers::l()),
-            Opcode::AdcAVHL => self.add_carry_memory(),
+            Mnemonic::AdcA => self.add_carry_register(Registers::a()),
+            Mnemonic::AdcB => self.add_carry_register(Registers::b()),
+            Mnemonic::AdcC => self.add_carry_register(Registers::c()),
+            Mnemonic::AdcD => self.add_carry_register(Registers::d()),
+            Mnemonic::AdcE => self.add_carry_register(Registers::e()),
+            Mnemonic::AdcH => self.add_carry_register(Registers::h()),
+            Mnemonic::AdcL => self.add_carry_register(Registers::l()),
+            Mnemonic::AdcAVHL => self.add_carry_memory(),
 
-            Opcode::SbcA => self.subtract_carry_register(Registers::a()),
-            Opcode::SbcB => self.subtract_carry_register(Registers::b()),
-            Opcode::SbcC => self.subtract_carry_register(Registers::c()),
-            Opcode::SbcD => self.subtract_carry_register(Registers::d()),
-            Opcode::SbcE => self.subtract_carry_register(Registers::e()),
-            Opcode::SbcH => self.subtract_carry_register(Registers::h()),
-            Opcode::SbcL => self.subtract_carry_register(Registers::l()),
+            Mnemonic::SbcA => self.subtract_carry_register(Registers::a()),
+            Mnemonic::SbcB => self.subtract_carry_register(Registers::b()),
+            Mnemonic::SbcC => self.subtract_carry_register(Registers::c()),
+            Mnemonic::SbcD => self.subtract_carry_register(Registers::d()),
+            Mnemonic::SbcE => self.subtract_carry_register(Registers::e()),
+            Mnemonic::SbcH => self.subtract_carry_register(Registers::h()),
+            Mnemonic::SbcL => self.subtract_carry_register(Registers::l()),
 
-            Opcode::JpXX => self.jump(|_| true),
-            Opcode::JpNZXX => self.jump(|status| !Flag::Zero.get(status)),
-            Opcode::JpZXX => self.jump(|status| Flag::Zero.get(status)),
-            Opcode::JpNCXX => self.jump(|status| !Flag::Carry.get(status)),
-            Opcode::JpCXX => self.jump(|status| Flag::Carry.get(status)),
-            Opcode::JpPOXX => self.jump(|status| Flag::ParityOverflow.get(status)),
-            Opcode::JpPEXX => self.jump(|status| !Flag::ParityOverflow.get(status)),
-            Opcode::JpPXX => self.jump(|status| !Flag::Sign.get(status)),
-            Opcode::JpMXX => self.jump(|status| Flag::Sign.get(status)),
+            Mnemonic::JpXX => self.jump(|_| true),
+            Mnemonic::JpNZXX => self.jump(|status| !Flag::Zero.get(status)),
+            Mnemonic::JpZXX => self.jump(|status| Flag::Zero.get(status)),
+            Mnemonic::JpNCXX => self.jump(|status| !Flag::Carry.get(status)),
+            Mnemonic::JpCXX => self.jump(|status| Flag::Carry.get(status)),
+            Mnemonic::JpPOXX => self.jump(|status| Flag::ParityOverflow.get(status)),
+            Mnemonic::JpPEXX => self.jump(|status| !Flag::ParityOverflow.get(status)),
+            Mnemonic::JpPXX => self.jump(|status| !Flag::Sign.get(status)),
+            Mnemonic::JpMXX => self.jump(|status| Flag::Sign.get(status)),
 
-            Opcode::JrX => self.jump_relative(|_| true),
-            Opcode::JrCX => self.jump_relative(|status| Flag::Carry.get(status)),
-            Opcode::JrNCX => self.jump_relative(|status| !Flag::Carry.get(status)),
-            Opcode::JrZX => self.jump_relative(|status| Flag::Zero.get(status)),
-            Opcode::JrNZX => self.jump_relative(|status| !Flag::Zero.get(status)),
+            Mnemonic::JrX => self.jump_relative(|_| true),
+            Mnemonic::JrCX => self.jump_relative(|status| Flag::Carry.get(status)),
+            Mnemonic::JrNCX => self.jump_relative(|status| !Flag::Carry.get(status)),
+            Mnemonic::JrZX => self.jump_relative(|status| Flag::Zero.get(status)),
+            Mnemonic::JrNZX => self.jump_relative(|status| !Flag::Zero.get(status)),
 
-            Opcode::DjNZX => self.decrement_and_jump_on_non_zero(),
+            Mnemonic::DjNZX => self.decrement_and_jump_on_non_zero(),
 
-            Opcode::CallXX => self.call(|_| true),
-            Opcode::CallNZXX => self.call(|status| !Flag::Zero.get(status)),
-            Opcode::CallZXX => self.call(|status| Flag::Zero.get(status)),
-            Opcode::CallNCXX => self.call(|status| !Flag::Carry.get(status)),
-            Opcode::CallCXX => self.call(|status| Flag::Carry.get(status)),
-            Opcode::CallPOXX => self.call(|status| Flag::ParityOverflow.get(status)),
-            Opcode::CallPEXX => self.call(|status| !Flag::ParityOverflow.get(status)),
-            Opcode::CallPXX => self.call(|status| !Flag::Sign.get(status)),
-            Opcode::CallMXX => self.call(|status| Flag::Sign.get(status)),
+            Mnemonic::CallXX => self.call(|_| true),
+            Mnemonic::CallNZXX => self.call(|status| !Flag::Zero.get(status)),
+            Mnemonic::CallZXX => self.call(|status| Flag::Zero.get(status)),
+            Mnemonic::CallNCXX => self.call(|status| !Flag::Carry.get(status)),
+            Mnemonic::CallCXX => self.call(|status| Flag::Carry.get(status)),
+            Mnemonic::CallPOXX => self.call(|status| Flag::ParityOverflow.get(status)),
+            Mnemonic::CallPEXX => self.call(|status| !Flag::ParityOverflow.get(status)),
+            Mnemonic::CallPXX => self.call(|status| !Flag::Sign.get(status)),
+            Mnemonic::CallMXX => self.call(|status| Flag::Sign.get(status)),
 
-            Opcode::Ret => self.ret(),
-            Opcode::RetNZ => self.ret_conditional(|status| !Flag::Zero.get(status)),
-            Opcode::RetZ => self.ret_conditional(|status| Flag::Zero.get(status)),
-            Opcode::RetNC => self.ret_conditional(|status| !Flag::Carry.get(status)),
-            Opcode::RetC => self.ret_conditional(|status| Flag::Carry.get(status)),
-            Opcode::RetPO => self.ret_conditional(|status| Flag::ParityOverflow.get(status)),
-            Opcode::RetPE => self.ret_conditional(|status| !Flag::ParityOverflow.get(status)),
-            Opcode::RetP => self.ret_conditional(|status| !Flag::Sign.get(status)),
-            Opcode::RetM => self.ret_conditional(|status| Flag::Sign.get(status)),
+            Mnemonic::Ret => self.ret(),
+            Mnemonic::RetNZ => self.ret_conditional(|status| !Flag::Zero.get(status)),
+            Mnemonic::RetZ => self.ret_conditional(|status| Flag::Zero.get(status)),
+            Mnemonic::RetNC => self.ret_conditional(|status| !Flag::Carry.get(status)),
+            Mnemonic::RetC => self.ret_conditional(|status| Flag::Carry.get(status)),
+            Mnemonic::RetPO => self.ret_conditional(|status| Flag::ParityOverflow.get(status)),
+            Mnemonic::RetPE => self.ret_conditional(|status| !Flag::ParityOverflow.get(status)),
+            Mnemonic::RetP => self.ret_conditional(|status| !Flag::Sign.get(status)),
+            Mnemonic::RetM => self.ret_conditional(|status| Flag::Sign.get(status)),
 
-            Opcode::LdBCXX => self.load_into_register_pair(Registers::into_bc()),
-            Opcode::LdDEXX => self.load_into_register_pair(Registers::into_de()),
-            Opcode::LdHLXX => self.load_into_register_pair(Registers::into_hl()),
-            Opcode::LdSPXX => self.load_into_register_pair(Registers::into_sp()),
+            Mnemonic::LdBCXX => self.load_into_register_pair(Registers::into_bc()),
+            Mnemonic::LdDEXX => self.load_into_register_pair(Registers::into_de()),
+            Mnemonic::LdHLXX => self.load_into_register_pair(Registers::into_hl()),
+            Mnemonic::LdSPXX => self.load_into_register_pair(Registers::into_sp()),
 
-            Opcode::LdVBCA => self.load_into_memory(Registers::a(), Registers::address_in_bc()),
-            Opcode::LdVDEA => self.load_into_memory(Registers::a(), Registers::address_in_de()),
-            Opcode::LdAVHL => {
+            Mnemonic::LdVBCA => self.load_into_memory(Registers::a(), Registers::address_in_bc()),
+            Mnemonic::LdVDEA => self.load_into_memory(Registers::a(), Registers::address_in_de()),
+            Mnemonic::LdAVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_a())
             }
-            Opcode::LdBVHL => {
+            Mnemonic::LdBVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_b())
             }
-            Opcode::LdCVHL => {
+            Mnemonic::LdCVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_c())
             }
-            Opcode::LdDVHL => {
+            Mnemonic::LdDVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_d())
             }
-            Opcode::LdEVHL => {
+            Mnemonic::LdEVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_e())
             }
-            Opcode::LdHVHL => {
+            Mnemonic::LdHVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_h())
             }
-            Opcode::LdLVHL => {
+            Mnemonic::LdLVHL => {
                 self.load_memory_into_register(Registers::address_in_hl(), Registers::into_l())
             }
 
-            Opcode::LdBA => self.load_register_into_register(Registers::a(), Registers::into_b()),
-            Opcode::LdBB => self.load_register_into_register(Registers::b(), Registers::into_b()),
-            Opcode::LdBC => self.load_register_into_register(Registers::c(), Registers::into_b()),
-            Opcode::LdBD => self.load_register_into_register(Registers::d(), Registers::into_b()),
-            Opcode::LdBE => self.load_register_into_register(Registers::e(), Registers::into_b()),
-            Opcode::LdBH => self.load_register_into_register(Registers::h(), Registers::into_b()),
-            Opcode::LdBL => self.load_register_into_register(Registers::l(), Registers::into_b()),
+            Mnemonic::LdBA => self.load_register_into_register(Registers::a(), Registers::into_b()),
+            Mnemonic::LdBB => self.load_register_into_register(Registers::b(), Registers::into_b()),
+            Mnemonic::LdBC => self.load_register_into_register(Registers::c(), Registers::into_b()),
+            Mnemonic::LdBD => self.load_register_into_register(Registers::d(), Registers::into_b()),
+            Mnemonic::LdBE => self.load_register_into_register(Registers::e(), Registers::into_b()),
+            Mnemonic::LdBH => self.load_register_into_register(Registers::h(), Registers::into_b()),
+            Mnemonic::LdBL => self.load_register_into_register(Registers::l(), Registers::into_b()),
 
-            Opcode::LdCA => self.load_register_into_register(Registers::a(), Registers::into_c()),
-            Opcode::LdCB => self.load_register_into_register(Registers::b(), Registers::into_c()),
-            Opcode::LdCC => self.load_register_into_register(Registers::c(), Registers::into_c()),
-            Opcode::LdCD => self.load_register_into_register(Registers::d(), Registers::into_c()),
-            Opcode::LdCE => self.load_register_into_register(Registers::e(), Registers::into_c()),
-            Opcode::LdCH => self.load_register_into_register(Registers::h(), Registers::into_c()),
-            Opcode::LdCL => self.load_register_into_register(Registers::l(), Registers::into_c()),
+            Mnemonic::LdCA => self.load_register_into_register(Registers::a(), Registers::into_c()),
+            Mnemonic::LdCB => self.load_register_into_register(Registers::b(), Registers::into_c()),
+            Mnemonic::LdCC => self.load_register_into_register(Registers::c(), Registers::into_c()),
+            Mnemonic::LdCD => self.load_register_into_register(Registers::d(), Registers::into_c()),
+            Mnemonic::LdCE => self.load_register_into_register(Registers::e(), Registers::into_c()),
+            Mnemonic::LdCH => self.load_register_into_register(Registers::h(), Registers::into_c()),
+            Mnemonic::LdCL => self.load_register_into_register(Registers::l(), Registers::into_c()),
 
-            Opcode::LdDA => self.load_register_into_register(Registers::a(), Registers::into_d()),
-            Opcode::LdDB => self.load_register_into_register(Registers::b(), Registers::into_d()),
-            Opcode::LdDC => self.load_register_into_register(Registers::c(), Registers::into_d()),
-            Opcode::LdDD => self.load_register_into_register(Registers::d(), Registers::into_d()),
-            Opcode::LdDE => self.load_register_into_register(Registers::e(), Registers::into_d()),
-            Opcode::LdDH => self.load_register_into_register(Registers::h(), Registers::into_d()),
-            Opcode::LdDL => self.load_register_into_register(Registers::l(), Registers::into_d()),
+            Mnemonic::LdDA => self.load_register_into_register(Registers::a(), Registers::into_d()),
+            Mnemonic::LdDB => self.load_register_into_register(Registers::b(), Registers::into_d()),
+            Mnemonic::LdDC => self.load_register_into_register(Registers::c(), Registers::into_d()),
+            Mnemonic::LdDD => self.load_register_into_register(Registers::d(), Registers::into_d()),
+            Mnemonic::LdDE => self.load_register_into_register(Registers::e(), Registers::into_d()),
+            Mnemonic::LdDH => self.load_register_into_register(Registers::h(), Registers::into_d()),
+            Mnemonic::LdDL => self.load_register_into_register(Registers::l(), Registers::into_d()),
 
-            Opcode::LdEA => self.load_register_into_register(Registers::a(), Registers::into_e()),
-            Opcode::LdEB => self.load_register_into_register(Registers::b(), Registers::into_e()),
-            Opcode::LdEC => self.load_register_into_register(Registers::c(), Registers::into_e()),
-            Opcode::LdED => self.load_register_into_register(Registers::d(), Registers::into_e()),
-            Opcode::LdEE => self.load_register_into_register(Registers::e(), Registers::into_e()),
-            Opcode::LdEH => self.load_register_into_register(Registers::h(), Registers::into_e()),
-            Opcode::LdEL => self.load_register_into_register(Registers::l(), Registers::into_e()),
+            Mnemonic::LdEA => self.load_register_into_register(Registers::a(), Registers::into_e()),
+            Mnemonic::LdEB => self.load_register_into_register(Registers::b(), Registers::into_e()),
+            Mnemonic::LdEC => self.load_register_into_register(Registers::c(), Registers::into_e()),
+            Mnemonic::LdED => self.load_register_into_register(Registers::d(), Registers::into_e()),
+            Mnemonic::LdEE => self.load_register_into_register(Registers::e(), Registers::into_e()),
+            Mnemonic::LdEH => self.load_register_into_register(Registers::h(), Registers::into_e()),
+            Mnemonic::LdEL => self.load_register_into_register(Registers::l(), Registers::into_e()),
 
-            Opcode::LdHA => self.load_register_into_register(Registers::a(), Registers::into_h()),
-            Opcode::LdHB => self.load_register_into_register(Registers::b(), Registers::into_h()),
-            Opcode::LdHC => self.load_register_into_register(Registers::c(), Registers::into_h()),
-            Opcode::LdHD => self.load_register_into_register(Registers::d(), Registers::into_h()),
-            Opcode::LdHE => self.load_register_into_register(Registers::e(), Registers::into_h()),
-            Opcode::LdHH => self.load_register_into_register(Registers::h(), Registers::into_h()),
-            Opcode::LdHL => self.load_register_into_register(Registers::l(), Registers::into_h()),
+            Mnemonic::LdHA => self.load_register_into_register(Registers::a(), Registers::into_h()),
+            Mnemonic::LdHB => self.load_register_into_register(Registers::b(), Registers::into_h()),
+            Mnemonic::LdHC => self.load_register_into_register(Registers::c(), Registers::into_h()),
+            Mnemonic::LdHD => self.load_register_into_register(Registers::d(), Registers::into_h()),
+            Mnemonic::LdHE => self.load_register_into_register(Registers::e(), Registers::into_h()),
+            Mnemonic::LdHH => self.load_register_into_register(Registers::h(), Registers::into_h()),
+            Mnemonic::LdHL => self.load_register_into_register(Registers::l(), Registers::into_h()),
 
-            Opcode::LdLA => self.load_register_into_register(Registers::a(), Registers::into_l()),
-            Opcode::LdLB => self.load_register_into_register(Registers::b(), Registers::into_l()),
-            Opcode::LdLC => self.load_register_into_register(Registers::c(), Registers::into_l()),
-            Opcode::LdLD => self.load_register_into_register(Registers::d(), Registers::into_l()),
-            Opcode::LdLE => self.load_register_into_register(Registers::e(), Registers::into_l()),
-            Opcode::LdLH => self.load_register_into_register(Registers::h(), Registers::into_l()),
-            Opcode::LdLL => self.load_register_into_register(Registers::l(), Registers::into_l()),
+            Mnemonic::LdLA => self.load_register_into_register(Registers::a(), Registers::into_l()),
+            Mnemonic::LdLB => self.load_register_into_register(Registers::b(), Registers::into_l()),
+            Mnemonic::LdLC => self.load_register_into_register(Registers::c(), Registers::into_l()),
+            Mnemonic::LdLD => self.load_register_into_register(Registers::d(), Registers::into_l()),
+            Mnemonic::LdLE => self.load_register_into_register(Registers::e(), Registers::into_l()),
+            Mnemonic::LdLH => self.load_register_into_register(Registers::h(), Registers::into_l()),
+            Mnemonic::LdLL => self.load_register_into_register(Registers::l(), Registers::into_l()),
 
-            Opcode::LdHLA => self.load_register_into_memory(Registers::a(), Registers::hl()),
-            Opcode::LdHLB => self.load_register_into_memory(Registers::b(), Registers::hl()),
-            Opcode::LdHLC => self.load_register_into_memory(Registers::c(), Registers::hl()),
-            Opcode::LdHLD => self.load_register_into_memory(Registers::d(), Registers::hl()),
-            Opcode::LdHLE => self.load_register_into_memory(Registers::e(), Registers::hl()),
-            Opcode::LdHLH => self.load_register_into_memory(Registers::h(), Registers::hl()),
-            Opcode::LdHLL => self.load_register_into_memory(Registers::l(), Registers::hl()),
+            Mnemonic::LdHLA => self.load_register_into_memory(Registers::a(), Registers::hl()),
+            Mnemonic::LdHLB => self.load_register_into_memory(Registers::b(), Registers::hl()),
+            Mnemonic::LdHLC => self.load_register_into_memory(Registers::c(), Registers::hl()),
+            Mnemonic::LdHLD => self.load_register_into_memory(Registers::d(), Registers::hl()),
+            Mnemonic::LdHLE => self.load_register_into_memory(Registers::e(), Registers::hl()),
+            Mnemonic::LdHLH => self.load_register_into_memory(Registers::h(), Registers::hl()),
+            Mnemonic::LdHLL => self.load_register_into_memory(Registers::l(), Registers::hl()),
 
-            Opcode::LdAA => self.load_register_into_register(Registers::a(), Registers::into_a()),
-            Opcode::LdAB => self.load_register_into_register(Registers::b(), Registers::into_a()),
-            Opcode::LdAC => self.load_register_into_register(Registers::c(), Registers::into_a()),
-            Opcode::LdAD => self.load_register_into_register(Registers::d(), Registers::into_a()),
-            Opcode::LdAE => self.load_register_into_register(Registers::e(), Registers::into_a()),
-            Opcode::LdAH => self.load_register_into_register(Registers::h(), Registers::into_a()),
-            Opcode::LdAL => self.load_register_into_register(Registers::l(), Registers::into_a()),
+            Mnemonic::LdAA => self.load_register_into_register(Registers::a(), Registers::into_a()),
+            Mnemonic::LdAB => self.load_register_into_register(Registers::b(), Registers::into_a()),
+            Mnemonic::LdAC => self.load_register_into_register(Registers::c(), Registers::into_a()),
+            Mnemonic::LdAD => self.load_register_into_register(Registers::d(), Registers::into_a()),
+            Mnemonic::LdAE => self.load_register_into_register(Registers::e(), Registers::into_a()),
+            Mnemonic::LdAH => self.load_register_into_register(Registers::h(), Registers::into_a()),
+            Mnemonic::LdAL => self.load_register_into_register(Registers::l(), Registers::into_a()),
 
-            Opcode::LdAX => self.load_value_into_register(Registers::into_a()),
-            Opcode::LdBX => self.load_value_into_register(Registers::into_b()),
-            Opcode::LdCX => self.load_value_into_register(Registers::into_c()),
-            Opcode::LdDX => self.load_value_into_register(Registers::into_d()),
-            Opcode::LdEX => self.load_value_into_register(Registers::into_e()),
-            Opcode::LdHX => self.load_value_into_register(Registers::into_h()),
-            Opcode::LdLX => self.load_value_into_register(Registers::into_l()),
+            Mnemonic::LdAX => self.load_value_into_register(Registers::into_a()),
+            Mnemonic::LdBX => self.load_value_into_register(Registers::into_b()),
+            Mnemonic::LdCX => self.load_value_into_register(Registers::into_c()),
+            Mnemonic::LdDX => self.load_value_into_register(Registers::into_d()),
+            Mnemonic::LdEX => self.load_value_into_register(Registers::into_e()),
+            Mnemonic::LdHX => self.load_value_into_register(Registers::into_h()),
+            Mnemonic::LdLX => self.load_value_into_register(Registers::into_l()),
 
-            Opcode::LdAVBC => {
+            Mnemonic::LdAVBC => {
                 self.load_memory_into_register(Registers::address_in_bc(), Registers::into_a())
             }
-            Opcode::LdAVDE => {
+            Mnemonic::LdAVDE => {
                 self.load_memory_into_register(Registers::address_in_de(), Registers::into_a())
             }
-            Opcode::LdVXXHL => self.load_wide_register_into_param_memory(Registers::hl()),
-            Opcode::LdHLVXX => self.load_param_memory_into_wide_register(Registers::into_hl()),
-            Opcode::LdVXXA => self.load_register_into_param_memory(Registers::a()),
-            Opcode::LdAVXX => self.load_param_memory_into_register(Registers::into_a()),
-            Opcode::LdVHLX => self.load_param_into_memory(Registers::hl()),
+            Mnemonic::LdVXXHL => self.load_wide_register_into_param_memory(Registers::hl()),
+            Mnemonic::LdHLVXX => self.load_param_memory_into_wide_register(Registers::into_hl()),
+            Mnemonic::LdVXXA => self.load_register_into_param_memory(Registers::a()),
+            Mnemonic::LdAVXX => self.load_param_memory_into_register(Registers::into_a()),
+            Mnemonic::LdVHLX => self.load_param_into_memory(Registers::hl()),
 
-            Opcode::AndA => self.and_register(Registers::a()),
-            Opcode::AndB => self.and_register(Registers::b()),
-            Opcode::AndC => self.and_register(Registers::c()),
-            Opcode::AndD => self.and_register(Registers::d()),
-            Opcode::AndE => self.and_register(Registers::e()),
-            Opcode::AndH => self.and_register(Registers::h()),
-            Opcode::AndL => self.and_register(Registers::l()),
-            Opcode::AndX => self.and_value(),
+            Mnemonic::AndA => self.and_register(Registers::a()),
+            Mnemonic::AndB => self.and_register(Registers::b()),
+            Mnemonic::AndC => self.and_register(Registers::c()),
+            Mnemonic::AndD => self.and_register(Registers::d()),
+            Mnemonic::AndE => self.and_register(Registers::e()),
+            Mnemonic::AndH => self.and_register(Registers::h()),
+            Mnemonic::AndL => self.and_register(Registers::l()),
+            Mnemonic::AndX => self.and_value(),
 
-            Opcode::OrA => self.or_register(Registers::a()),
-            Opcode::OrB => self.or_register(Registers::b()),
-            Opcode::OrC => self.or_register(Registers::c()),
-            Opcode::OrD => self.or_register(Registers::d()),
-            Opcode::OrE => self.or_register(Registers::e()),
-            Opcode::OrH => self.or_register(Registers::h()),
-            Opcode::OrL => self.or_register(Registers::l()),
-            Opcode::OrX => self.or_value(),
+            Mnemonic::OrA => self.or_register(Registers::a()),
+            Mnemonic::OrB => self.or_register(Registers::b()),
+            Mnemonic::OrC => self.or_register(Registers::c()),
+            Mnemonic::OrD => self.or_register(Registers::d()),
+            Mnemonic::OrE => self.or_register(Registers::e()),
+            Mnemonic::OrH => self.or_register(Registers::h()),
+            Mnemonic::OrL => self.or_register(Registers::l()),
+            Mnemonic::OrX => self.or_value(),
 
-            Opcode::XorA => self.xor_register(Registers::a()),
-            Opcode::XorB => self.xor_register(Registers::b()),
-            Opcode::XorC => self.xor_register(Registers::c()),
-            Opcode::XorD => self.xor_register(Registers::d()),
-            Opcode::XorE => self.xor_register(Registers::e()),
-            Opcode::XorH => self.xor_register(Registers::h()),
-            Opcode::XorL => self.xor_register(Registers::l()),
-            Opcode::XorX => self.xor_value(),
+            Mnemonic::XorA => self.xor_register(Registers::a()),
+            Mnemonic::XorB => self.xor_register(Registers::b()),
+            Mnemonic::XorC => self.xor_register(Registers::c()),
+            Mnemonic::XorD => self.xor_register(Registers::d()),
+            Mnemonic::XorE => self.xor_register(Registers::e()),
+            Mnemonic::XorH => self.xor_register(Registers::h()),
+            Mnemonic::XorL => self.xor_register(Registers::l()),
+            Mnemonic::XorX => self.xor_value(),
 
-            Opcode::PushAF => self.push_to_stack(Registers::af()),
-            Opcode::PushBC => self.push_to_stack(Registers::bc()),
-            Opcode::PushDE => self.push_to_stack(Registers::de()),
-            Opcode::PushHL => self.push_to_stack(Registers::hl()),
+            Mnemonic::PushAF => self.push_to_stack(Registers::af()),
+            Mnemonic::PushBC => self.push_to_stack(Registers::bc()),
+            Mnemonic::PushDE => self.push_to_stack(Registers::de()),
+            Mnemonic::PushHL => self.push_to_stack(Registers::hl()),
 
-            Opcode::PopAF => self.pop_from_stack(Registers::into_af()),
-            Opcode::PopBC => self.pop_from_stack(Registers::into_bc()),
-            Opcode::PopDE => self.pop_from_stack(Registers::into_de()),
-            Opcode::PopHL => self.pop_from_stack(Registers::into_hl()),
+            Mnemonic::PopAF => self.pop_from_stack(Registers::into_af()),
+            Mnemonic::PopBC => self.pop_from_stack(Registers::into_bc()),
+            Mnemonic::PopDE => self.pop_from_stack(Registers::into_de()),
+            Mnemonic::PopHL => self.pop_from_stack(Registers::into_hl()),
 
-            Opcode::RLCA => self.rotate_accumulator_copy_left(),
-            Opcode::RRCA => self.rotate_accumulator_copy_right(),
-            Opcode::RLA => self.rotate_accumulator_left(),
-            Opcode::RRA => self.rotate_accumulator_right(),
+            Mnemonic::RLCA => self.rotate_accumulator_copy_left(),
+            Mnemonic::RRCA => self.rotate_accumulator_copy_right(),
+            Mnemonic::RLA => self.rotate_accumulator_left(),
+            Mnemonic::RRA => self.rotate_accumulator_right(),
         }
 
-        callbacks.do_after_instruction_exec(self, opcode);
-        callbacks.do_after_instruction_exec_match(self, opcode);
+        callbacks.do_after_instruction_exec(self, instruction);
+        callbacks.do_after_instruction_exec_match(self, instruction);
     }
 
     fn next_byte(&mut self) -> u8 {
