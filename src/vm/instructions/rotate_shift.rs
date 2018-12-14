@@ -1,20 +1,31 @@
 use crate::vm::cpu::alu;
 use crate::vm::cpu::flags::Flag;
+use crate::vm::cpu::registers::Registers;
 use crate::vm::machine::Machine;
+use crate::vm::TargetRegisterSelector;
 
 impl Machine {
     pub(crate) fn rotate_accumulator_copy_left(&mut self) {
-        let old_value = self.cpu.state.registers.af.0 as u16;
+        self.rotate_register_copy_left_impl(Registers::into_a());
+        self.clock(4);
+    }
+
+    fn rotate_register_copy_left(&mut self, selector: TargetRegisterSelector) {
+        self.rotate_register_copy_left_impl(selector);
+        self.clock(8);
+    }
+
+    fn rotate_register_copy_left_impl(&mut self, selector: TargetRegisterSelector) {
+        let old_value = *selector(&mut self.cpu.state) as u16;
         let carry = alu::get_bit::<u16>(old_value & 0x40 != 0);
         let new_value = (old_value << 1) | carry;
-        self.cpu.state.registers.af.0 = new_value as u8;
+        *selector(&mut self.cpu.state) = new_value as u8;
         {
             let state = &mut self.cpu.state;
             Flag::Carry.set(state, carry == 1);
             Flag::HalfCarry.set(state, false);
             Flag::AddSubtract.set(state, false);
         }
-        self.clock(4);
     }
 
     pub(crate) fn rotate_accumulator_left(&mut self) {
