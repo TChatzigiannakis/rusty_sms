@@ -18,21 +18,21 @@ impl Program {
         self.bin.push(element.get_u8());
     }
 
-    pub fn add_param(&mut self, Mnemonic: Mnemonic, parameter: u8) {
-        self.bin.push(Mnemonic as u8);
+    pub fn add_param(&mut self, mnemonic: Mnemonic, parameter: u8) {
+        self.bin.push(mnemonic as u8);
         self.bin.push(parameter);
     }
 
-    pub fn add_param_word(&mut self, Mnemonic: Mnemonic, parameter: u16) {
+    pub fn add_param_word(&mut self, mnemonic: Mnemonic, parameter: u16) {
         let low = parameter as u8;
         let high = (parameter >> 0x08) as u8;
-        self.bin.push(Mnemonic as u8);
+        self.bin.push(mnemonic as u8);
         self.bin.push(low);
         self.bin.push(high);
     }
 
-    pub fn add_params(&mut self, Mnemonic: Mnemonic, parameter_1: u8, parameter_2: u8) {
-        self.bin.push(Mnemonic as u8);
+    pub fn add_params(&mut self, mnemonic: Mnemonic, parameter_1: u8, parameter_2: u8) {
+        self.bin.push(mnemonic as u8);
         self.bin.push(parameter_1);
         self.bin.push(parameter_2);
     }
